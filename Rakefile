@@ -20,7 +20,7 @@ Jeweler::Tasks.new do |gem|
   gem.summary = %Q{Job-centric stats for Resque}
   gem.email = "gapeabody@gmail.com"
   gem.authors = ["alanpeabody"]
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.description = %Q{Tracks jobs performed, failed, and the duration of the last 100 jobs for each job type.}
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
