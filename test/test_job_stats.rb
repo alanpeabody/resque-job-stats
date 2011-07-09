@@ -10,6 +10,16 @@ class SimpleJob
   end
 end
 
+class FailJob
+  extend Resque::Plugins::JobStats
+
+  @queue = :test
+
+  def self.perform(*payload)
+    raise 'fail'
+  end
+end
+
 class TestResqueJobStats < MiniTest::Unit::TestCase
   def setup
     @worker = Resque::Worker.new(:test)
@@ -32,6 +42,21 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     end
 
     assert_equal 3, SimpleJob.jobs_performed
+
+  end
+
+  def test_jobs_failed
+
+    assert_equal 'stats:jobs:FailJob:failed', FailJob.jobs_failed_key
+
+    FailJob.jobs_failed = 0
+    
+    3.times do
+      Resque.enqueue(FailJob)
+      @worker.work(0)
+    end
+
+    assert_equal 3, FailJob.jobs_failed
 
   end
 end
