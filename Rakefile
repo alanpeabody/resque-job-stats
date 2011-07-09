@@ -17,10 +17,10 @@ Jeweler::Tasks.new do |gem|
   gem.name = "resque-job-stats"
   gem.homepage = "http://github.com/alanpeabody/resque-job-stats"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Job-centric stats for Resque}
   gem.email = "gapeabody@gmail.com"
   gem.authors = ["alanpeabody"]
+  gem.description = %Q{TODO: longer description of your gem}
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
