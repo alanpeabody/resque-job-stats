@@ -8,8 +8,9 @@ Stats tracked are:
 
 * Jobs performed
 * Jobs failed
-* Average job time
-* Longest job time
+* Duration of last x jobs completed
+* Average job duration over last x jobs completed
+* Longest job duration over last x jobs completed
 
 This information can be used to help track performance and diagnose specific bottlenecks.
 
@@ -42,6 +43,7 @@ Alternatively you can include just the metric you wish to record.
   class MyVerbosJob
     extend Resque::Plugins::JobStats::Performed
     extend Resque::Plugins::JobStats::Failed
+    extend Resque::Plugins::JobStats::Duration
     extend Resque::Plugins::JobStats::AverageDuration
     extend Resque::Plugins::JobStats::LongestDuration
 
