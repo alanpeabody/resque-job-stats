@@ -8,10 +8,16 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require 'minitest/unit'
+require 'resque'
+
+Resque.redis = 'localhost:6379'
+Resque.redis.namespace = 'resque:job_stats'
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'resque-job-stats'
+
+
 
 class MiniTest::Unit::TestCase
 end
