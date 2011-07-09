@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["alanpeabody"]
   s.date = %q{2011-07-09}
-  s.description = %q{TODO: longer description of your gem}
+  s.description = %q{Tracks jobs performed, failed, and the duration of the last 100 jobs for each job type.}
   s.email = %q{gapeabody@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE.txt",
@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     "lib/resque/plugins/job_stats/duration.rb",
     "lib/resque/plugins/job_stats/failed.rb",
     "lib/resque/plugins/job_stats/performed.rb",
+    "resque-job-stats.gemspec",
     "test/helper.rb",
     "test/test_job_stats.rb"
   ]
