@@ -1,6 +1,54 @@
 = resque-job-stats
 
-Description goes here.
+Job centric stats for Resque.
+
+Stats are tracked per Job type (class/module) in addition to the worker based stats Resque provides.
+
+Stats tracked are:
+
+* Jobs performed
+* Jobs failed
+* Average job time
+* Longest job time
+
+This information can be used to help track performance and diagnose specific bottlenecks.
+
+We are sending this information to Nagios for graphing and alerts (via a custom rake task).
+
+== Installation
+
+*Requires resque '~> 1.17.0'*
+
+In your Gemfile add:
+
+  gem 'resque-job-stats'
+
+== Usage
+
+Simply extend your class
+
+  class MyJob
+    extend Resque::Plugins::JobStats
+    
+    def perform(*payload)
+      # ..
+    end
+  end
+
+And you will have a set of keys starting with 'stats:jobs:my_job' inside your Resque redis namespace.
+
+Alternatively you can include just the metric you wish to record.
+
+  class MyVerbosJob
+    extend Resque::Plugins::JobStats::Performed
+    extend Resque::Plugins::JobStats::Failed
+    extend Resque::Plugins::JobStats::AverageDuration
+    extend Resque::Plugins::JobStats::LongestDuration
+
+    def perform(*payload)
+      # ...
+    end
+  end
 
 == Contributing to resque-job-stats
  
@@ -14,6 +62,5 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2011 alanpeabody. See LICENSE.txt for
-further details.
+Copyright (c) 2011 Alan Peabody. See LICENSE.txt for further details.
 
