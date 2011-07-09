@@ -30,7 +30,7 @@ Simply extend your class
   class MyJob
     extend Resque::Plugins::JobStats
     
-    def perform(*payload)
+    def self.perform(*payload)
       # ..
     end
   end
@@ -45,7 +45,7 @@ Alternatively you can include just the metric you wish to record.
     extend Resque::Plugins::JobStats::AverageDuration
     extend Resque::Plugins::JobStats::LongestDuration
 
-    def perform(*payload)
+    def self.perform(*payload)
       # ...
     end
   end
