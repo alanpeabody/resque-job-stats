@@ -8,6 +8,7 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require 'minitest/unit'
+require 'redgreen'
 require 'resque'
 
 Resque.redis = 'localhost:6379'

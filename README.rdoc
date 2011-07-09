@@ -44,8 +44,10 @@ Alternatively you can include just the metric you wish to record.
     extend Resque::Plugins::JobStats::Performed
     extend Resque::Plugins::JobStats::Failed
     extend Resque::Plugins::JobStats::Duration
-    extend Resque::Plugins::JobStats::AverageDuration
-    extend Resque::Plugins::JobStats::LongestDuration
+    extend Resque::Plugins::JobStats::Duration::Maximum
+    extend Resque::Plugins::JobStats::Duration::Average
+    
+    record_job_duration_of_last 100
 
     def self.perform(*payload)
       # ...
