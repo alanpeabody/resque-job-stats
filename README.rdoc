@@ -9,8 +9,8 @@ Stats tracked are:
 * Jobs performed
 * Jobs failed
 * Duration of last x jobs completed
-* Average job duration over last x jobs completed
-* Longest job duration over last x jobs completed
+* Average job duration over last 100 jobs completed
+* Longest job duration over last 100 jobs completed
 
 This information can be used to help track performance and diagnose specific bottlenecks.
 
@@ -44,15 +44,18 @@ Alternatively you can include just the metric you wish to record.
     extend Resque::Plugins::JobStats::Performed
     extend Resque::Plugins::JobStats::Failed
     extend Resque::Plugins::JobStats::Duration
-    extend Resque::Plugins::JobStats::Duration::Maximum
-    extend Resque::Plugins::JobStats::Duration::Average
-    
-    record_job_duration_of_last 100
 
     def self.perform(*payload)
       # ...
     end
   end
+
+Duration module also extends the class with two methods, job_rolling_avg and longest_job.
+
+== TODO
+
+* Allow classes to define how many job's duration to measure
+* Add ui for stats in resque-web
 
 == Contributing to resque-job-stats
  
