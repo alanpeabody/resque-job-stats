@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{resque-job-stats}
-  s.version = "0.0.0"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["alanpeabody"]
-  s.date = %q{2011-07-09}
+  s.date = %q{2011-07-14}
   s.description = %q{Tracks jobs performed, failed, and the duration of the last 100 jobs for each job type.}
   s.email = %q{gapeabody@gmail.com}
   s.extra_rdoc_files = [
