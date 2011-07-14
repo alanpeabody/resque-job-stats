@@ -24,14 +24,21 @@ module Resque
           yield
           duration = Time.now - start
 
-          Resque.redis.multi do
-            Resque.redis.lpush(jobs_duration_key, duration)
-            Resque.redis.ltrim(jobs_duration_key, 0, job_durations_to_track)
-          end
+          Resque.redis.lpush(jobs_duration_key, duration)
+          Resque.redis.ltrim(jobs_duration_key, 0, job_durations_to_track)
         end
 
         def job_durations_to_track
           100
+        end
+
+        def job_rolling_avg
+          job_times = job_durations
+          job_times.inject(0.0) {|s,j| s + j} / job_times.size
+        end
+
+        def longest_job
+          job_durations.max
         end
 
       end

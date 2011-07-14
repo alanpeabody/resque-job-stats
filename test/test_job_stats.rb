@@ -66,6 +66,8 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_in_delta 0.3, SimpleJob.job_durations[0], 0.01
     assert_in_delta 0.2, SimpleJob.job_durations[1], 0.01
     assert_in_delta 0.1, SimpleJob.job_durations[2], 0.01
+    assert_in_delta 0.3, SimpleJob.longest_job, 0.01
+    assert_in_delta 0.2, SimpleJob.job_rolling_avg, 0.01
   end
 
 end
