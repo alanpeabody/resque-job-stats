@@ -58,6 +58,7 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
   def test_duration
     assert_equal 'stats:jobs:SimpleJob:duration', SimpleJob.jobs_duration_key
     SimpleJob.reset_job_durations
+    assert_equal 0.0, SimpleJob.job_rolling_avg
     3.times do |i|
       d = (i + 1)/10.0
       Resque.enqueue(SimpleJob,d)

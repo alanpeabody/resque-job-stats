@@ -34,6 +34,7 @@ module Resque
 
         def job_rolling_avg
           job_times = job_durations
+          return 0.0 if job_times.size == 0.0
           job_times.inject(0.0) {|s,j| s + j} / job_times.size
         end
 
