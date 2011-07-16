@@ -18,7 +18,7 @@ module Resque
 
         # Returns the key used for tracking jobs performed
         def jobs_performed_key
-          @jobs_performed_key ||= "stats:jobs:#{self.name}:performed"
+          "stats:jobs:#{self.name}:performed"
         end
 
         # Increments the performed count when job is complete

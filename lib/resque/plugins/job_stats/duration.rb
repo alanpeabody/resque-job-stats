@@ -15,7 +15,7 @@ module Resque
 
         # Returns the key used for tracking job durations
         def jobs_duration_key
-          @jobs_failed_key ||= "stats:jobs:#{self.name}:duration"
+          "stats:jobs:#{self.name}:duration"
         end
 
         # Increments the failed count when job is complete

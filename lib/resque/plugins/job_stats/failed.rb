@@ -18,7 +18,7 @@ module Resque
 
         # Returns the key used for tracking jobs failed
         def jobs_failed_key
-          @jobs_failed_key ||= "stats:jobs:#{self.name}:failed"
+          "stats:jobs:#{self.name}:failed"
         end
 
         # Increments the failed count when job is complete
