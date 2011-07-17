@@ -18,9 +18,7 @@ We are sending this information to Nagios for graphing and alerts (via a custom 
 
 == Installation
 
-_Requires resque '~> 1.17.0'_
-
-However, it should work with most earlier versions as well.
+Requires resque '~> 1.17.0'
 
 In your Gemfile add:
 
