@@ -39,7 +39,7 @@ module Resque
         end
 
         def longest_job
-          job_durations.max
+          job_durations.max.to_f
         end
 
       end
