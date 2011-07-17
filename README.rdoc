@@ -18,7 +18,9 @@ We are sending this information to Nagios for graphing and alerts (via a custom 
 
 == Installation
 
-*Requires resque '~> 1.17.0'*
+_Requires resque '~> 1.17.0'_
+
+However, it should work with most earlier versions as well.
 
 In your Gemfile add:
 
@@ -40,7 +42,7 @@ And you will have a set of keys starting with 'stats:jobs:my_job' inside your Re
 
 Alternatively you can include just the metric you wish to record.
 
-  class MyVerbosJob
+  class MyVerboseJob
     extend Resque::Plugins::JobStats::Performed
     extend Resque::Plugins::JobStats::Failed
     extend Resque::Plugins::JobStats::Duration
@@ -50,7 +52,7 @@ Alternatively you can include just the metric you wish to record.
     end
   end
 
-Duration module also extends the class with two methods, job_rolling_avg and longest_job.
+Duration module also extends the class with two singleton methods, MyJob.job_rolling_avg and MyJob.longest_job.
 
 == TODO
 
