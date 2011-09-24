@@ -22,6 +22,12 @@ class FailJob < BaseJob
   end
 end
 
+class CustomDurJob < BaseJob
+  extend Resque::Plugins::JobStats::Duration
+  @queue = :test
+  @durations_recorded = 5
+end
+
 class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def setup
@@ -60,16 +66,35 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     SimpleJob.reset_job_durations
     assert_equal 0.0, SimpleJob.job_rolling_avg
     assert_equal 0.0, SimpleJob.longest_job
+
     3.times do |i|
       d = (i + 1)/10.0
       Resque.enqueue(SimpleJob,d)
       @worker.work(0)
     end
+
     assert_in_delta 0.3, SimpleJob.job_durations[0], 0.01
     assert_in_delta 0.2, SimpleJob.job_durations[1], 0.01
     assert_in_delta 0.1, SimpleJob.job_durations[2], 0.01
     assert_in_delta 0.3, SimpleJob.longest_job, 0.01
     assert_in_delta 0.2, SimpleJob.job_rolling_avg, 0.01
+  end
+
+  def test_custom_duration
+    CustomDurJob.reset_job_durations
+
+    2.times do |i|
+      Resque.enqueue(CustomDurJob,1.0)
+      @worker.work(0)
+    end
+
+    5.times do |i|
+      Resque.enqueue(CustomDurJob,0.1)
+      @worker.work(0)
+    end
+
+    assert_in_delta 0.1, CustomDurJob.longest_job, 0.01
+    assert_in_delta 0.1, CustomDurJob.job_rolling_avg, 0.01
   end
 
 end
