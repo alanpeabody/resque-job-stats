@@ -38,4 +38,4 @@ DEPENDENCIES
   minitest
   mynyml-redgreen (~> 0.7.1)
   rcov
-  resque (~> 1.17.0)
+  resque (~> 1.17)
