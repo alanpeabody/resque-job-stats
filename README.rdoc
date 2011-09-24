@@ -30,7 +30,8 @@ Simply extend your class
 
   class MyJob
     extend Resque::Plugins::JobStats
-    
+
+    @queue = :my_job
     def self.perform(*payload)
       # ..
     end
@@ -45,20 +46,40 @@ Alternatively you can include just the metric you wish to record.
     extend Resque::Plugins::JobStats::Failed
     extend Resque::Plugins::JobStats::Duration
 
+    @queue = :my_job
     def self.perform(*payload)
       # ...
     end
   end
 
-Duration module also extends the class with two singleton methods, MyJob.job_rolling_avg and MyJob.longest_job.
+=== Duration module
+
+The duration module provides two metrics, the longest job and the job rolling avg.
+
+These are accessible via two singleton methods, MyJob.job_rolling_avg and MyJob.longest_job.
+
+By default the last 100 jobs durations are stored and used to provide the above metrics.
+
+You may set the number of jobs to include by setting the @durations_recorded variable.
+
+
+  class MyJob
+    extend Resque::Plugins::JobStats::Duration
+
+    @queue = :my_job
+    @durations_recorded = 1000
+
+    def self.perform(*payload)
+      # ...
+    end
+  end
 
 == TODO
 
-* Allow classes to define how many job's duration to measure
 * Add ui for stats in resque-web
 
 == Contributing to resque-job-stats
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 * Fork the project
