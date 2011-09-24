@@ -10,7 +10,7 @@ module Resque
 
         # Returns the number of jobs failed
         def job_durations
-          Resque.redis.lrange(jobs_duration_key,0,job_durations_to_track).map(&:to_f)
+          Resque.redis.lrange(jobs_duration_key,0,durations_recorded - 1).map(&:to_f)
         end
 
         # Returns the key used for tracking job durations
@@ -25,11 +25,11 @@ module Resque
           duration = Time.now - start
 
           Resque.redis.lpush(jobs_duration_key, duration)
-          Resque.redis.ltrim(jobs_duration_key, 0, job_durations_to_track)
+          Resque.redis.ltrim(jobs_duration_key, 0, durations_recorded)
         end
 
-        def job_durations_to_track
-          100
+        def durations_recorded
+          @durations_recorded || 100
         end
 
         def job_rolling_avg

@@ -83,12 +83,12 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
   def test_custom_duration
     CustomDurJob.reset_job_durations
 
-    2.times do |i|
+    2.times do
       Resque.enqueue(CustomDurJob,1.0)
       @worker.work(0)
     end
 
-    5.times do |i|
+    5.times do
       Resque.enqueue(CustomDurJob,0.1)
       @worker.work(0)
     end
