@@ -1,6 +1,6 @@
 = resque-job-stats
 
-{<img src="http://travis-ci.org/alanpeabody/resque-job-stats.png" />}[http://travis-ci.org/alanpeabody/resque-job-stats]
+{<img src="https://secure.travis-ci.org/alanpeabody/resque-job-stats.png?branch=master" />}[http://travis-ci.org/alanpeabody/resque-job-stats]
 
 Job centric stats for Resque.
 
