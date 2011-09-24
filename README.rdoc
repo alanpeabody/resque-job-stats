@@ -1,5 +1,7 @@
 = resque-job-stats
 
+{<img src="http://travis-ci.org/alanpeabody/resque-job-stats.png" />}[http://travis-ci.org/alanpeabody/resque-job-stats]
+
 Job centric stats for Resque.
 
 Stats are tracked per Job type (class/module) in addition to the worker based stats Resque provides.
