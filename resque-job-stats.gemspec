@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{resque-job-stats}
-  s.version = "0.2.1"
+  s.name = "resque-job-stats"
+  s.version = "0.2.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["alanpeabody"]
-  s.date = %q{2011-09-24}
-  s.description = %q{Tracks jobs performed, failed, and the duration of the last 100 jobs for each job type.}
-  s.email = %q{gapeabody@gmail.com}
+  s.date = "2011-11-07"
+  s.description = "Tracks jobs performed, failed, and the duration of the last 100 jobs for each job type."
+  s.email = "gapeabody@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README.rdoc"
@@ -19,8 +19,8 @@ Gem::Specification.new do |s|
   s.files = [
     ".document",
     ".rvmrc",
+    ".travis.yml",
     "Gemfile",
-    "Gemfile.lock",
     "LICENSE.txt",
     "README.rdoc",
     "Rakefile",
@@ -34,11 +34,11 @@ Gem::Specification.new do |s|
     "test/helper.rb",
     "test/test_job_stats.rb"
   ]
-  s.homepage = %q{http://github.com/alanpeabody/resque-job-stats}
+  s.homepage = "http://github.com/alanpeabody/resque-job-stats"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.6.2}
-  s.summary = %q{Job-centric stats for Resque}
+  s.rubygems_version = "1.8.10"
+  s.summary = "Job-centric stats for Resque"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
