@@ -19,7 +19,7 @@ module Resque
         end
 
         # Increments the failed count when job is complete
-        def around_perform_job_stats_duration(*payload)
+        def around_perform_job_stats_duration(*args)
           start = Time.now
           yield
           duration = Time.now - start

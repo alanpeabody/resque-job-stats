@@ -14,6 +14,8 @@ Stats tracked are:
 * Duration of last x jobs completed
 * Average job duration over last 100 jobs completed
 * Longest job duration over last 100 jobs completed
+* Jobs enqueued as timeseries data (minute, hourly)
+* Jobs performed as timeseries data (minute, hourly)
 
 This information can be used to help track performance and diagnose specific bottlenecks.
 
@@ -35,7 +37,7 @@ Simply extend your class
     extend Resque::Plugins::JobStats
 
     @queue = :my_job
-    def self.perform(*payload)
+    def self.perform(*args)
       # ..
     end
   end
@@ -49,9 +51,11 @@ Alternatively you can include just the metric you wish to record.
     extend Resque::Plugins::JobStats::Enqueued
     extend Resque::Plugins::JobStats::Failed
     extend Resque::Plugins::JobStats::Duration
+    extend Resque::Plugins::JobStats::Timeseries::Enqueued
+    extend Resque::Plugins::JobStats::Timeseries::Performed
 
     @queue = :my_job
-    def self.perform(*payload)
+    def self.perform(*args)
       # ...
     end
   end
@@ -77,6 +81,11 @@ You may set the number of jobs to include by setting the @durations_recorded var
       # ...
     end
   end
+
+=== Timeseries module
+
+The timeseries module provides timeseries counts of jobs performed. The metrics are rolling and kept for a period of time before being expired.
+The timestamp used for the timeseries data is UTC.
 
 == TODO
 

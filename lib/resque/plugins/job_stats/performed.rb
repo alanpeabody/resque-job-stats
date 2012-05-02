@@ -2,7 +2,7 @@ module Resque
   module Plugins
     module JobStats
 
-      # Extend your job with this module to track how many 
+      # Extend your job with this module to track how many
       # jobs are performed successfully
       module Performed
 
@@ -22,7 +22,7 @@ module Resque
         end
 
         # Increments the performed count when job is complete
-        def after_perform_job_stats_performed(*payload)
+        def after_perform_job_stats_performed(*args)
           Resque.redis.incr(jobs_performed_key)
         end
 

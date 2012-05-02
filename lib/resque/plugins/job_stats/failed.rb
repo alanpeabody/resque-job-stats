@@ -2,7 +2,7 @@ module Resque
   module Plugins
     module JobStats
 
-      # Extend your job with this module to track how many 
+      # Extend your job with this module to track how many
       # jobs fail
       module Failed
 
@@ -22,7 +22,7 @@ module Resque
         end
 
         # Increments the failed count when job is complete
-        def on_failure_job_stats_failed(e,*payload)
+        def on_failure_job_stats_failed(e,*args)
           Resque.redis.incr(jobs_failed_key)
         end
 
