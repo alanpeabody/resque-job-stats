@@ -51,6 +51,16 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_equal 3, SimpleJob.jobs_performed
   end
 
+  def test_jobs_enqueued
+    assert_equal 'stats:jobs:SimpleJob:enqueued', SimpleJob.jobs_enqueued_key
+    SimpleJob.jobs_enqueued = 0
+    3.times do
+      Resque.enqueue(SimpleJob)
+      @worker.work(0)
+    end
+    assert_equal 3, SimpleJob.jobs_enqueued
+  end
+
   def test_jobs_failed
     assert_equal 'stats:jobs:FailJob:failed', FailJob.jobs_failed_key
     FailJob.jobs_failed = 0

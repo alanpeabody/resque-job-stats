@@ -9,6 +9,7 @@ Stats are tracked per Job type (class/module) in addition to the worker based st
 Stats tracked are:
 
 * Jobs performed
+* Jobs enqueued
 * Jobs failed
 * Duration of last x jobs completed
 * Average job duration over last 100 jobs completed
@@ -45,6 +46,7 @@ Alternatively you can include just the metric you wish to record.
 
   class MyVerboseJob
     extend Resque::Plugins::JobStats::Performed
+    extend Resque::Plugins::JobStats::Enqueued
     extend Resque::Plugins::JobStats::Failed
     extend Resque::Plugins::JobStats::Duration
 
