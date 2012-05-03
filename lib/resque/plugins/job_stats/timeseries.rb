@@ -8,81 +8,36 @@ module Resque
       # jobs are performed over a period of time
       module Timeseries
 
-        module Enqueued
-          include Resque::Plugins::JobStats::Timeseries
-
-          # Increments the enqueued count for the timestamp when job is queued
-          def after_enqueue_job_stats_timeseries(*args)
-            incr_timeseries(:enqueued)
+        module Common
+          # A timestamp rounded to the lowest minute
+          def timestamp
+            time = Time.now.utc.round
+            time -= time.sec
           end
 
-          # Hash of timeseries data over the last 60 minutes for queued jobs
-          def queued_per_minute
-            timeseries_data(:enqueued, 60, :minutes)
-          end
+          private
 
-          # Hash of timeseries data over the last 24 hours for queued jobs
-          def queued_per_hour
-            timeseries_data(:enqueued, 24, :hours)
-          end
-        end
+          TIME_FORMAT = {:minutes => "%d:%H:%M", :hours => "%d:%H"}
+          FACTOR = {:minutes => 1, :hours => 60}
 
-        module Performed
-          include Resque::Plugins::JobStats::Timeseries
-
-          # Increments the performed count for the timestamp when job is complete
-          def after_perform_job_stats_timeseries(*args)
-            incr_timeseries(:performed)
-          end
-
-          # Hash of timeseries data over the last 60 minutes for completed jobs
-          def performed_per_minute
-            timeseries_data(:performed, 60, :minutes)
-          end
-
-          # Hash of timeseries data over the last 24 hours for completed jobs
-          def performed_per_hour
-            timeseries_data(:performed, 24, :hours)
-          end
-        end
-
-        private
-
-          def timestamp # :nodoc:
-            Time.now.utc
-          end
-
-          def period(sample_size, time_unit, from) # :nodoc:
-            case time_unit
-            when :minutes
-              factor = 1
-            when :hours
-              factor = 60
-            end
-            (0..sample_size).map { |n| from - (n * 60 * factor)}
+          def range(sample_size, time_unit, end_time) # :nodoc:
+            (0..sample_size).map { |n| end_time - (n * 60 * FACTOR[time_unit])}
           end
 
           def timeseries_data(type, sample_size, time_unit) # :nodoc:
-            period = period(sample_size, time_unit, timestamp)
-            timeseries_data = Resque.redis.mget(*(period.map { |time| jobs_timeseries_key(type, time, time_unit)}) )
-            return Hash[(0..sample_size).map { |i| [period[i].strftime(format(time_unit)), timeseries_data[i].to_i]}]
+            timeseries_range = range(sample_size, time_unit, timestamp)
+            timeseries_keys = timeseries_range.map { |time| jobs_timeseries_key(type, time, time_unit)}
+            timeseries_data = Resque.redis.mget(*(timeseries_keys))
+
+            return Hash[(0..sample_size).map { |i| [timeseries_range[i], timeseries_data[i].to_i]}]
           end
 
           def jobs_timeseries_key(type, key_time, time_unit) # :nodoc:
-            "#{prefix}:#{type}:#{key_time.strftime(format(time_unit))}"
+            "#{prefix}:#{type}:#{key_time.strftime(TIME_FORMAT[time_unit])}"
           end
 
           def prefix # :nodoc:
             "stats:jobs:#{self.name}:timeseries"
-          end
-
-          def format(unit) # :nodoc:
-            case unit
-            when :minutes
-              "%d:%H:%M"
-            when :hours
-              "%d:%H"
-            end
           end
 
           def incr_timeseries(type) # :nodoc:
@@ -95,9 +50,46 @@ module Resque
             Resque.redis.incr(key)
             Resque.redis.expire(key, ttl)
           end
-
+        end
       end
     end
   end
 end
 
+module Resque::Plugins::JobStats::Timeseries::Enqueued
+  include Resque::Plugins::JobStats::Timeseries::Common
+
+  # Increments the enqueued count for the timestamp when job is queued
+  def after_enqueue_job_stats_timeseries(*args)
+    incr_timeseries(:enqueued)
+  end
+
+  # Hash of timeseries data over the last 60 minutes for queued jobs
+  def queued_per_minute
+    timeseries_data(:enqueued, 60, :minutes)
+  end
+
+  # Hash of timeseries data over the last 24 hours for queued jobs
+  def queued_per_hour
+    timeseries_data(:enqueued, 24, :hours)
+  end
+end
+
+module Resque::Plugins::JobStats::Timeseries::Performed
+  include Resque::Plugins::JobStats::Timeseries::Common
+
+  # Increments the performed count for the timestamp when job is complete
+  def after_perform_job_stats_timeseries(*args)
+    incr_timeseries(:performed)
+  end
+
+  # Hash of timeseries data over the last 60 minutes for completed jobs
+  def performed_per_minute
+    timeseries_data(:performed, 60, :minutes)
+  end
+
+  # Hash of timeseries data over the last 24 hours for completed jobs
+  def performed_per_hour
+    timeseries_data(:performed, 24, :hours)
+  end
+end

@@ -108,27 +108,27 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
   end
 
   def test_perform_timeseries
-    time = Time.now.utc
+    time = SimpleJob.timestamp
     3.times do
       Resque.enqueue(SimpleJob)
       @worker.work(0)
     end
-    assert_equal 3, SimpleJob.performed_per_minute["#{time.strftime("%d:%H:%M")}"]
-    assert_equal 0, SimpleJob.performed_per_minute["#{(time - 60).strftime("%d:%H:%M")}"]
+    assert_equal 3, SimpleJob.performed_per_minute[time]
+    assert_equal 0, SimpleJob.performed_per_minute[(time - 60)]
 
-    assert_equal 3, SimpleJob.performed_per_hour["#{time.strftime("%d:%H")}"]
-    assert_equal 0, SimpleJob.performed_per_hour["#{(time - 3600).strftime("%d:%H")}"]
+    assert_equal 3, SimpleJob.performed_per_hour[time]
+    assert_equal 0, SimpleJob.performed_per_hour[(time - 3600)]
   end
 
   def test_enqueue_timeseries
-    time = Time.now.utc
+    time = SimpleJob.timestamp
     1.times do
       Resque.enqueue(SimpleJob,60)
       @worker.work(0)
     end
-    assert_equal 1, SimpleJob.queued_per_minute["#{time.strftime("%d:%H:%M")}"]
-    assert_equal 0, SimpleJob.queued_per_minute["#{(time + 60).strftime("%d:%H:%M")}"]
-    assert_equal 1, SimpleJob.performed_per_minute["#{(time + 60).strftime("%d:%H:%M")}"]
+    assert_equal 1, SimpleJob.queued_per_minute[time]
+    assert_equal 0, SimpleJob.queued_per_minute[(time + 60)]
+    assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
   end
 
 end
