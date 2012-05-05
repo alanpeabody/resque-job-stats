@@ -124,13 +124,14 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def test_enqueue_timeseries
     time = SimpleJob.timestamp
-    1.times do
-      Resque.enqueue(SimpleJob,60)
-      @worker.work(0)
-    end
+    Timecop.freeze(time)
+    Resque.enqueue(SimpleJob,0)
+    Timecop.freeze(time + 60)
+    @worker.work(0)
     assert_equal 1, SimpleJob.queued_per_minute[time]
     assert_equal 0, SimpleJob.queued_per_minute[(time + 60)]
     assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
+    Timecop.return
   end
 
 end
