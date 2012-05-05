@@ -1,36 +1,9 @@
 module Resque
   module Plugins
     module JobStats
-
-      module EnqueuedAt
-        def self.included(base) #:nodoc:
-          base.class_eval do
-            alias_method :push_without_timestamp, :push
-            extend ClassMethods
-          end
-        end
-
-        module ClassMethods
-          # wrapper for the original resque push method, which adds an
-          # enqueued_at timestamp to any +item+ pushed onto the queue which
-          # includes an args hash
-          #
-          def push(queue, item)
-            if item.include?(:args)
-              item[:args] << {:enqueued_at => Time.now.utc}
-            end
-            push_without_timestamp queue, item
-          end
-        end
-      end
-
       # Extend your job with this module to track how long
-      # jobs are wating in the queue before being processed
+      # jobs are waiting in the queue before being processed
       module QueueWait
-
-        def self.extended(base) #:nodoc:
-          Resque.send(:include, Resque::Plugins::JobStats::EnqueuedAt)
-        end
 
         # Resets all job wait times
         def reset_job_wait_times
@@ -47,16 +20,20 @@ module Resque
           "stats:jobs:#{self.name}:waittime"
         end
 
-        # Records the job wait time
+        def message_enqueued_key(args)
+          "stats:jobs:#{self.name}:message-enqueued-at:#{args.to_s.hash}"
+        end
+
+        def after_enqueue_job_stats_queue_wait(*args)
+          Resque.redis.lpush(message_enqueued_key(args), Time.now.utc.to_i)
+        end
+
         def before_perform_job_stats_queue_wait(*args)
-          time = Time.now.utc
-          enqueued_at = time
-          args.each { |arg| enqueued_at = Time.parse(arg["enqueued_at"]) if arg.is_a?(::Hash) && !arg["enqueued_at"].nil?}
-
-          wait_time = time - enqueued_at
-
-          Resque.redis.lpush(jobs_wait_key, wait_time)
-          Resque.redis.ltrim(jobs_wait_key, 0, wait_times_recorded)
+          if enqueued_at = Resque.redis.rpop(message_enqueued_key(args))
+            wait_time = Time.now.utc.to_i - enqueued_at.to_i
+            Resque.redis.lpush(jobs_wait_key, wait_time)
+            Resque.redis.ltrim(jobs_wait_key, 0, wait_times_recorded)
+          end
         end
 
         def wait_times_recorded
