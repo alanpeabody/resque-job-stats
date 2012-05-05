@@ -31,6 +31,8 @@ end
 class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def setup
+    # Ensure empty redis for each test
+    Resque.redis.flushdb
     @worker = Resque::Worker.new(:test)
   end
 
