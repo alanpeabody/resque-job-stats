@@ -3,13 +3,14 @@ require 'helper'
 class BaseJob
   @queue = :test
 
-  def self.perform(sleep_time=0.01)
+  def self.perform(sleep_time = 0.01)
     sleep sleep_time
   end
 end
 
 class SimpleJob < BaseJob
   extend Resque::Plugins::JobStats
+  extend Resque::Plugins::JobStats::QueueWait
   @queue = :test
 end
 
@@ -26,6 +27,12 @@ class CustomDurJob < BaseJob
   extend Resque::Plugins::JobStats::Duration
   @queue = :test
   @durations_recorded = 5
+end
+
+class CustomWaitJob < BaseJob
+  extend Resque::Plugins::JobStats::QueueWait
+  @queue = :test
+  @wait_times_recorded = 5
 end
 
 class TestResqueJobStats < MiniTest::Unit::TestCase
@@ -132,6 +139,44 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_equal 0, SimpleJob.queued_per_minute[(time + 60)]
     assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
     Timecop.return
+  end
+
+  def test_queue_wait
+    assert_equal 'stats:jobs:SimpleJob:waittime', SimpleJob.jobs_wait_key
+    SimpleJob.reset_job_wait_times
+    assert_equal 0.0, SimpleJob.rolling_avg_wait_time
+    assert_equal 0.0, SimpleJob.longest_wait
+
+    3.times do |i|
+      Resque.enqueue(SimpleJob)
+      sleep (i + 1)
+      @worker.work(0)
+    end
+
+    assert_in_delta 3.5, SimpleJob.job_wait_times[0], 0.5
+    assert_in_delta 2.5, SimpleJob.job_wait_times[1], 0.5
+    assert_in_delta 1.5, SimpleJob.job_wait_times[2], 0.5
+    assert_in_delta 3.5, SimpleJob.longest_wait, 0.5
+    assert_in_delta 2.0, SimpleJob.rolling_avg_wait_time, 0.5
+  end
+
+  def test_custom_wait_time
+    CustomWaitJob.reset_job_wait_times
+
+    2.times do
+      Resque.enqueue(CustomWaitJob)
+      sleep 2.0
+      @worker.work(0)
+    end
+
+    5.times do
+      Resque.enqueue(CustomWaitJob)
+      sleep 1.0
+      @worker.work(0)
+    end
+
+    assert_in_delta 1.5, CustomWaitJob.longest_wait, 0.5
+    assert_in_delta 1.5, CustomWaitJob.rolling_avg_wait_time, 0.5
   end
 
 end
