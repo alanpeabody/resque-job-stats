@@ -3,9 +3,7 @@ require 'helper'
 class BaseJob
   @queue = :test
 
-  def self.perform(*args)
-    sleep_time = 0.01
-    args.each { |arg| sleep_time = arg["sleep"] if arg.is_a?(::Hash) && !arg["sleep"].nil?}
+  def self.perform(sleep_time = 0.01)
     sleep sleep_time
   end
 end
@@ -40,6 +38,8 @@ end
 class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def setup
+    # Ensure empty redis for each test
+    Resque.redis.flushdb
     @worker = Resque::Worker.new(:test)
   end
 
@@ -88,7 +88,7 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
     3.times do |i|
       d = (i + 1)/10.0
-      Resque.enqueue(SimpleJob, {:sleep => d})
+      Resque.enqueue(SimpleJob,d)
       @worker.work(0)
     end
 
@@ -103,12 +103,12 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     CustomDurJob.reset_job_durations
 
     2.times do
-      Resque.enqueue(CustomDurJob, {:sleep => 1.0})
+      Resque.enqueue(CustomDurJob,1.0)
       @worker.work(0)
     end
 
     5.times do
-      Resque.enqueue(CustomDurJob, {:sleep => 0.1})
+      Resque.enqueue(CustomDurJob,0.1)
       @worker.work(0)
     end
 
@@ -131,13 +131,14 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def test_enqueue_timeseries
     time = SimpleJob.timestamp
-    1.times do
-      Resque.enqueue(SimpleJob, {:sleep => 60})
-      @worker.work(0)
-    end
+    Timecop.freeze(time)
+    Resque.enqueue(SimpleJob,0)
+    Timecop.freeze(time + 60)
+    @worker.work(0)
     assert_equal 1, SimpleJob.queued_per_minute[time]
     assert_equal 0, SimpleJob.queued_per_minute[(time + 60)]
     assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
+    Timecop.return
   end
 
   def test_queue_wait
