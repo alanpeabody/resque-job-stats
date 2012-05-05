@@ -17,7 +17,7 @@ class FailJob < BaseJob
   extend Resque::Plugins::JobStats::Failed
   @queue = :test
 
-  def self.perform(*payload)
+  def self.perform(*args)
     raise 'fail'
   end
 end
@@ -49,6 +49,16 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
       @worker.work(0)
     end
     assert_equal 3, SimpleJob.jobs_performed
+  end
+
+  def test_jobs_enqueued
+    assert_equal 'stats:jobs:SimpleJob:enqueued', SimpleJob.jobs_enqueued_key
+    SimpleJob.jobs_enqueued = 0
+    3.times do
+      Resque.enqueue(SimpleJob)
+      @worker.work(0)
+    end
+    assert_equal 3, SimpleJob.jobs_enqueued
   end
 
   def test_jobs_failed
@@ -95,6 +105,30 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
     assert_in_delta 0.1, CustomDurJob.longest_job, 0.01
     assert_in_delta 0.1, CustomDurJob.job_rolling_avg, 0.01
+  end
+
+  def test_perform_timeseries
+    time = SimpleJob.timestamp
+    3.times do
+      Resque.enqueue(SimpleJob)
+      @worker.work(0)
+    end
+    assert_equal 3, SimpleJob.performed_per_minute[time]
+    assert_equal 0, SimpleJob.performed_per_minute[(time - 60)]
+
+    assert_equal 3, SimpleJob.performed_per_hour[time]
+    assert_equal 0, SimpleJob.performed_per_hour[(time - 3600)]
+  end
+
+  def test_enqueue_timeseries
+    time = SimpleJob.timestamp
+    1.times do
+      Resque.enqueue(SimpleJob,60)
+      @worker.work(0)
+    end
+    assert_equal 1, SimpleJob.queued_per_minute[time]
+    assert_equal 0, SimpleJob.queued_per_minute[(time + 60)]
+    assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
   end
 
 end
