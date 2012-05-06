@@ -5,7 +5,8 @@ module Resque
       module EnqueuedAt
         def self.included(base) #:nodoc:
           base.class_eval do
-            alias_method :push_without_timestamp, :push
+            alias_method :original_push, :push
+            alias_method :original_pop, :pop
             extend ClassMethods
           end
         end
@@ -16,10 +17,31 @@ module Resque
           # includes an args hash
           #
           def push(queue, item)
-            if item.include?(:args)
-              item[:args] << {:enqueued_at => Time.now.utc}
+            if item.respond_to?(:[]=)
+              item[:enqueued_at] = Time.now.utc
             end
-            push_without_timestamp queue, item
+            original_push queue, item
+          end
+
+          def pop(queue)
+            item = original_pop(queue)
+            if item.respond_to?(:[]=) && enqueued_at = item["enqueued_at"]
+              wait_time = Time.now.utc - Time.parse(enqueued_at)
+
+              item_class = constantize(item['class'])
+
+              if queue_wait_class?(item_class)
+                Resque.redis.lpush(item_class.jobs_wait_key, wait_time)
+                Resque.redis.ltrim(item_class.jobs_wait_key, 0, item_class.wait_times_recorded)
+              end
+            end
+            item
+          end
+
+          private
+
+          def queue_wait_class?(item_class)
+            item_class && item_class.respond_to?(:jobs_wait_key) && item_class.respond_to?(:wait_times_recorded)
           end
         end
       end
@@ -45,18 +67,6 @@ module Resque
         # Returns the key used for tracking job wait times
         def jobs_wait_key
           "stats:jobs:#{self.name}:waittime"
-        end
-
-        # Records the job wait time
-        def before_perform_job_stats_queue_wait(*args)
-          time = Time.now.utc
-          enqueued_at = time
-          args.each { |arg| enqueued_at = Time.parse(arg["enqueued_at"]) if arg.is_a?(::Hash) && !arg["enqueued_at"].nil?}
-
-          wait_time = time - enqueued_at
-
-          Resque.redis.lpush(jobs_wait_key, wait_time)
-          Resque.redis.ltrim(jobs_wait_key, 0, wait_times_recorded)
         end
 
         def wait_times_recorded
