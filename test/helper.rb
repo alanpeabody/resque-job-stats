@@ -10,6 +10,7 @@ end
 require 'minitest/unit'
 require 'redgreen'
 require 'resque'
+require 'timecop'
 
 Resque.redis = 'localhost:6379'
 Resque.redis.namespace = 'resque:job_stats'
