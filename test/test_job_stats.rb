@@ -40,6 +40,8 @@ end
 class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def setup
+    # Ensure empty redis for each test
+    Resque.redis.flushdb
     @worker = Resque::Worker.new(:test)
   end
 
@@ -131,13 +133,14 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def test_enqueue_timeseries
     time = SimpleJob.timestamp
-    1.times do
-      Resque.enqueue(SimpleJob, {:sleep => 60})
-      @worker.work(0)
-    end
+    Timecop.freeze(time)
+    Resque.enqueue(SimpleJob,0)
+    Timecop.freeze(time + 60)
+    @worker.work(0)
     assert_equal 1, SimpleJob.queued_per_minute[time]
     assert_equal 0, SimpleJob.queued_per_minute[(time + 60)]
     assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
+    Timecop.return
   end
 
   def test_queue_wait
@@ -148,8 +151,9 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
     3.times do |i|
       Resque.enqueue(SimpleJob)
-      sleep (i + 1)
+      Timecop.freeze(Time.now + i + 1)
       @worker.work(0)
+      Timecop.return
     end
 
     assert_in_delta 3.5, SimpleJob.job_wait_times[0], 0.5
@@ -164,14 +168,16 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
     2.times do
       Resque.enqueue(CustomWaitJob)
-      sleep 2.0
+      Timecop.freeze(Time.now + 2)
       @worker.work(0)
+      Timecop.return
     end
 
     5.times do
       Resque.enqueue(CustomWaitJob)
-      sleep 1.0
+      Timecop.freeze(Time.now + 1)
       @worker.work(0)
+      Timecop.return
     end
 
     assert_in_delta 1.5, CustomWaitJob.longest_wait, 0.5
