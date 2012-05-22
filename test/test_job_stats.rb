@@ -160,7 +160,7 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_in_delta 2.5, SimpleJob.job_wait_times[1], 0.5
     assert_in_delta 1.5, SimpleJob.job_wait_times[2], 0.5
     assert_in_delta 3.5, SimpleJob.longest_wait, 0.5
-    assert_in_delta 2.0, SimpleJob.rolling_avg_wait_time, 0.5
+    assert_in_delta 2.0, SimpleJob.rolling_avg_wait_time, 0.9
   end
 
   def test_custom_wait_time
