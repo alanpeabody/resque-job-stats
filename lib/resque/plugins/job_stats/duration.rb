@@ -8,7 +8,7 @@ module Resque
           Resque.redis.del(jobs_duration_key)
         end
 
-        # Returns the number of jobs failed
+        # Returns the recorded durations
         def job_durations
           Resque.redis.lrange(jobs_duration_key,0,durations_recorded - 1).map(&:to_f)
         end
@@ -18,7 +18,7 @@ module Resque
           "stats:jobs:#{self.name}:duration"
         end
 
-        # Increments the failed count when job is complete
+        # Records the job duration
         def around_perform_job_stats_duration(*args)
           start = Time.now
           yield

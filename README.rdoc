@@ -16,6 +16,8 @@ Stats tracked are:
 * Longest job duration over last 100 jobs completed
 * Jobs enqueued as timeseries data (minute, hourly)
 * Jobs performed as timeseries data (minute, hourly)
+* Average queue wait time over last 100 jobs queued
+* Longest queue wait time over last 100 jobs queued
 
 This information can be used to help track performance and diagnose specific bottlenecks.
 
@@ -53,6 +55,7 @@ Alternatively you can include just the metric you wish to record.
     extend Resque::Plugins::JobStats::Duration
     extend Resque::Plugins::JobStats::Timeseries::Enqueued
     extend Resque::Plugins::JobStats::Timeseries::Performed
+    extend Resque::Plugins::JobStats::QueueWait
 
     @queue = :my_job
     def self.perform(*args)
@@ -62,7 +65,7 @@ Alternatively you can include just the metric you wish to record.
 
 === Duration module
 
-The duration module provides two metrics, the longest job and the job rolling avg.
+The duration (time taken to process a job) module provides two metrics, the longest job and the job rolling avg.
 
 These are accessible via two singleton methods, MyJob.job_rolling_avg and MyJob.longest_job.
 
@@ -77,7 +80,7 @@ You may set the number of jobs to include by setting the @durations_recorded var
     @queue = :my_job
     @durations_recorded = 1000
 
-    def self.perform(*payload)
+    def self.perform(*args)
       # ...
     end
   end
@@ -86,6 +89,30 @@ You may set the number of jobs to include by setting the @durations_recorded var
 
 The timeseries module provides timeseries counts of jobs performed. The metrics are rolling and kept for a period of time before being expired.
 The timestamp used for the timeseries data is UTC.
+
+=== QueueWait module
+
+The queue wait (time a job spends in a queue before being processed) module provides two metrics, the longest wait and the rolling avg wait time.
+
+These are accessible via two singleton methods, MyJob.rolling_avg_wait_time and MyJob.longest_wait.
+
+By default the last 100 jobs wait times are stored and used to provide the above metrics.
+
+You may set the number of jobs to include by setting the @wait_times_recorded variable.
+
+
+  class MyJob
+    extend Resque::Plugins::JobStats::QueueWait
+
+    @queue = :my_job
+    @wait_times_recorded = 1000
+
+    def self.perform(*args)
+      # ...
+    end
+  end
+
+Note: Because the QueueWait module adds an enqueued_at arg to every job which adds a small overhead the module is not included by default in Resque::Plugins::JobStats.
 
 == TODO
 
