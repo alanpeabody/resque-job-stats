@@ -87,9 +87,22 @@ You may set the number of jobs to include by setting the @durations_recorded var
 The timeseries module provides timeseries counts of jobs performed. The metrics are rolling and kept for a period of time before being expired.
 The timestamp used for the timeseries data is UTC.
 
+== Resque Web Tab
+
+The Resque web page for showing the statistics will only display jobs that extend Resque::Plugins::JobStats (in other words, just
+the jobs that include all of the metrics):
+
+  class MyJob
+    extend Resque::Plugins::JobStats
+    ...
+  end 
+
+The interface can be included in your app like this:
+
+  require 'resque-job-status/server'
+  
 == TODO
 
-* Add ui for stats in resque-web
 
 == Contributing to resque-job-stats
 

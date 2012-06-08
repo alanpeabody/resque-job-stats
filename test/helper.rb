@@ -8,6 +8,8 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require 'minitest/unit'
+require 'minitest/mock'
+require 'rack/test'
 require 'redgreen'
 require 'resque'
 require 'timecop'

@@ -1,0 +1,26 @@
+<h1>Resque Job Stats</h1>
+
+<p class="intro">
+  This page displays statistics about jobs that have been executed.
+</p>
+
+<table>
+  <tr>
+    <th>Job Name</th>
+    <th>Queued</th>
+    <th>Successfully Performed</th>
+    <th>Failed</th>
+    <th>Average Duration</th>
+    <th>Longest Run</th>
+  </tr>
+  <% @jobs.each do |job| %>
+    <tr>
+      <td><%= job.name %></td>
+      <td><%= number_display(job.jobs_enqueued) %></td>
+      <td><%= number_display(job.jobs_performed) %></td>
+      <td><%= number_display(job.jobs_failed) %></td>
+      <td><%= time_display(job.job_rolling_avg) %></td>
+      <td><%= time_display(job.longest_job) %></td>
+    </tr>
+  <% end %>
+</table>
