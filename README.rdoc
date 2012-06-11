@@ -100,6 +100,10 @@ the jobs that include all of the metrics):
 The interface can be included in your app like this:
 
   require 'resque-job-status/server'
+
+If you wish to display only certain metrics, you can filter the metrics accordingly.  The default metrics can be found in Resque::Plugins::JobStats::Statistic.
+  
+  Resque::Server.job_stats_to_display = [:jobs_enqueued, :job_rolling_avg]
   
 == TODO
 
