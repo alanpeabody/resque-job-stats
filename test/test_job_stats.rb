@@ -134,4 +134,7 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     Timecop.return
   end
 
+  def test_measured_jobs
+    assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
+  end
 end
