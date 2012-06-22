@@ -5,14 +5,14 @@ module Resque
     module JobStats
       module Server
         VIEW_PATH = File.join(File.dirname(__FILE__), 'server', 'views')
-        
-        def job_stats_to_display 
+
+        def job_stats_to_display
           @job_stats_to_display ||= Resque::Plugins::JobStats::Statistic::DEFAULT_STATS
         end
 
-        # Set this to an array of the public accessor names in Resque::Plugins::JobStats::Statistic 
+        # Set this to an array of the public accessor names in Resque::Plugins::JobStats::Statistic
         # that you wish to display.  The default is [:jobs_enqueued, :jobs_performed, :jobs_failed, :job_rolling_avg, :longest_job]
-        # Examples: 
+        # Examples:
         #   Resque::Server.job_stats_to_display = [:jobs_performed, :job_rolling_avg]
         def job_stats_to_display=(stats)
           @job_stats_to_display = stats
@@ -20,7 +20,7 @@ module Resque
 
         module Helpers
           def display_stat?(stat_name)
-            self.class.job_stats_to_display == :all || 
+            self.class.job_stats_to_display == :all ||
               [self.class.job_stats_to_display].flatten.map(&:to_sym).include?(stat_name.to_sym)
           end
 
@@ -53,7 +53,7 @@ module Resque
               erb(File.read(File.join(VIEW_PATH, 'job_stats.erb')))
             end
             # We have little choice in using this funky name - Resque
-            # already has a "Stats" tab, and it doesn't like 
+            # already has a "Stats" tab, and it doesn't like
             # tab names with spaces in it (it translates the url as job%20stats)
             app.tabs << "Job_Stats"
 
