@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'resque', '~> 1.17', '< 1.20'
+gem 'resque', '~> 1.17'
 
 group :development do
   gem 'minitest', '>= 0'

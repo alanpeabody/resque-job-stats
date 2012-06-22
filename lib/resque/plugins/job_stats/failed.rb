@@ -13,7 +13,9 @@ module Resque
 
         # Returns the number of jobs failed
         def jobs_failed
-          Resque.redis.get(jobs_failed_key).to_i
+          jobs_failed = Resque.redis.get(jobs_failed_key).to_i
+          return jobs_failed / 2 if Resque::VERSION == '1.20.0'
+          jobs_failed
         end
 
         # Returns the key used for tracking jobs failed
