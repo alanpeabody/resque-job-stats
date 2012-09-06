@@ -15,7 +15,12 @@
   </tr>
   <% @jobs.each do |job| %>
     <tr>
-      <td><%= job.name %></td>      
+      <td>
+        <%= job.name %>
+        <% if job.job_class <= Resque::Plugins::JobStats::History %>
+          <a href='<%= url "/job_history/#{job.name}" %>'>[history]</a>
+        <% end %>
+      </td>
       <%= display_stat(job, :jobs_enqueued,   :number_display) %>
       <%= display_stat(job, :jobs_performed,  :number_display) %>
       <%= display_stat(job, :jobs_failed,     :number_display) %>

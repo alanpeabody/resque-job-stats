@@ -1,0 +1,38 @@
+<h1>Resque Job Histories</h1>
+
+<p class="intro">
+  This page displays histories of jobs that have been executed.
+</p>
+
+<h2><%= @job_class %></h2>
+
+<table>
+  <tr>
+    <th>Start time</th>
+    <th>Duration</th>
+    <th>Arguments</th>
+    <th>Success</th>
+    <th>Exception</th>
+  </tr>
+  <% @histories.each do |history| %>
+    <tr>
+      <td><span class="time"><%= history["run_at"] %></span></td>
+      <td><%= history["duration"] %></td>
+      <td><%= history["args"].inspect %></td>
+      <td><%= check_or_cross_stat(history["success"]) %></td>
+      <td><%= history["exception"]["name"] if history["exception"] %></td>
+    </tr>
+  <% end %>
+</table>
+
+<%if @start > 0 || @start + @limit <= @size %>
+<p class='pagination'>
+  <% if @start - @limit >= 0 %>
+    <a href="<%= current_page %>?start=<%= [0, @start - @limit].max %>&limit=<%= @limit %>" class='less'>&laquo; less</a>
+  <% end %>
+  <% if @start + @limit <= @size %>
+    <a href="<%= current_page %>?start=<%= @start + @limit %>&limit=<%= @limit %>" class='more'>more &raquo;</a>
+  <% end %>
+</p>
+<%end%>
+

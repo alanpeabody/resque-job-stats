@@ -44,6 +44,10 @@ module Resque
               "<td>#{formatted_stat}</td>"
             end
           end
+
+          def check_or_cross_stat(value)
+            value ? "&#x2713;" : "&#x2717;"
+          end
         end
 
         class << self
@@ -56,6 +60,21 @@ module Resque
             # already has a "Stats" tab, and it doesn't like
             # tab names with spaces in it (it translates the url as job%20stats)
             app.tabs << "Job_Stats"
+
+            app.get '/job_history/:job_class' do
+              @job_class = Resque::Plugins::JobStats.measured_jobs.find { |j| j.to_s == params[:job_class] }
+              pass unless @job_class
+
+              @start = 0
+              @start = params[:start].to_i if params[:start]
+              @limit = 100
+              @limit = params[:limit].to_i if params[:limit]
+
+              @histories = @job_class.job_histories(@start,@limit)
+              @size = @job_class.histories_recorded
+
+              erb(File.read(File.join(VIEW_PATH, 'job_histories.erb')))
+            end
 
             app.helpers(Helpers)
           end
