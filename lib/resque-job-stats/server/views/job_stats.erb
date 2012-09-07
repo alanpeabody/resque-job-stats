@@ -17,7 +17,8 @@
     <tr>
       <td>
         <%= job.name %>
-        <% if job.job_class <= Resque::Plugins::JobStats::History %>
+        <% if job.job_class <= Resque::Plugins::JobStats::History ||
+              job.job_class.is_a?(Resque::Plugins::JobStats::History) %>
           <a href='<%= url "/job_history/#{job.name}" %>'>[history]</a>
         <% end %>
       </td>
