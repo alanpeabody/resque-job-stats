@@ -24,6 +24,7 @@ module Resque
           yield
           duration = Time.now - start
 
+          Resque::Plugins::JobStats.add_measured_job(self.name)
           Resque.redis.lpush(jobs_duration_key, duration)
           Resque.redis.ltrim(jobs_duration_key, 0, durations_recorded)
         end
