@@ -12,6 +12,8 @@
     <%= stat_header(:jobs_failed) %>
     <%= stat_header(:job_rolling_avg) %>
     <%= stat_header(:longest_job) %>
+    <%= stat_header(:job_latency_avg) %>
+    <%= stat_header(:job_latency_max) %>
   </tr>
   <% @jobs.each do |job| %>
     <tr>
@@ -21,6 +23,8 @@
       <%= display_stat(job, :jobs_failed,     :number_display) %>
       <%= display_stat(job, :job_rolling_avg, :time_display) %>
       <%= display_stat(job, :longest_job,     :time_display) %>
+      <%= display_stat(job, :job_latency_avg, :time_display) %>
+      <%= display_stat(job, :job_latency_max, :time_display) %>
     </tr>
   <% end %>
 </table>

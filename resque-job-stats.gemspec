@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     "lib/resque-job-stats/server/views/job_stats.erb",
     "lib/resque/plugins/job_stats.rb",
     "lib/resque/plugins/job_stats/duration.rb",
+    "lib/resque/plugins/job_stats/latency.rb",
     "lib/resque/plugins/job_stats/enqueued.rb",
     "lib/resque/plugins/job_stats/failed.rb",
     "lib/resque/plugins/job_stats/performed.rb",
