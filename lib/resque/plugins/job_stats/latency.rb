@@ -20,7 +20,7 @@ module Resque
 
         # Increments the failed count when job is complete
         def around_perform_job_stats_latency(*args)
-          if @metadata && self.queued_at
+          if self.queued_at
             latency = Time.now.to_f - self.queued_at
             Resque::Plugins::JobStats.add_measured_job(self.name)
             Resque.redis.lpush(jobs_latency_key, latency)
