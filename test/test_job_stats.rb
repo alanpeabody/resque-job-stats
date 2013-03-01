@@ -134,6 +134,16 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     Timecop.return
   end
 
+  def test_queue_pending
+    time = SimpleJob.timestamp
+    3.times do
+      Resque.enqueue(SimpleJob)
+    end
+
+    assert_equal 6, SimpleJob.pending_per_minute[time]
+    assert_equal 6, SimpleJob.pending_per_hour[time]
+  end
+
   def test_measured_jobs
     assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
   end
