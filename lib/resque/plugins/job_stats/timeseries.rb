@@ -98,7 +98,7 @@ module Resque::Plugins::JobStats::Timeseries::Pending
   include Resque::Plugins::JobStats::Timeseries::Common
 
   # Increments the performed count for the timestamp when job is complete
-  def after_enqueue_job_stats_timeseries_perform(*args)
+  def after_enqueue_job_stats_timeseries_pending(*args)
     incr_timeseries(:pending, Resque.info[:pending])
   end
 
