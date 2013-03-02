@@ -24,6 +24,30 @@ class AnyJobber
     def longest_job
       0.455555
     end
+
+    def queued_per_minute
+      {"2013-03-01 01:16:00 UTC"=>222, "2013-03-01 01:15:00 UTC"=>0}
+    end
+
+    def queued_per_hour
+      {"2013-03-01 01:17:00 UTC"=>333, "2013-03-01 00:18:00 UTC"=>0}
+    end
+
+    def performed_per_minute
+      {"2013-03-01 01:16:00 UTC"=>444, "2013-03-01 01:15:00 UTC"=>0}
+    end
+
+    def performed_per_hour
+      {"2013-03-01 01:17:00 UTC"=>555, "2013-03-01 01:18:00 UTC"=>0}
+    end
+
+    def pending_per_minute
+      {"2013-03-01 01:16:00 UTC"=>666, "2013-03-01 01:15:00 UTC"=>0}
+    end
+
+    def pending_per_hour
+      {"2013-03-01 01:17:00 UTC"=>777, "2013-03-01 01:18:00 UTC"=>0}
+    end
   end
 end
 
@@ -75,6 +99,69 @@ class TestServer < MiniTest::Unit::TestCase
       assert !last_response.body.include?("<td></td>"), "jobs_failed was not found"
       assert !last_response.body.include?("<td>0.33s</td>"),  "job_rolling_avg was not found"
       assert last_response.body.include?("<td>0.46s</td>"), "longest_job was not found"
+    end
+  end
+
+  def test_job_stats_timeseries_minute
+    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+      get '/job_stats_timeseries_minute'
+      assert_equal 200, last_response.status, last_response.body
+      assert last_response.body.include?("AnyJobber"), "job name was not found"
+      assert last_response.body.include?("<td>2013-03-01 01:16:00 UTC</td>"),  "queued_per_minute was not found"
+      assert last_response.body.include?("<td>222</td>"),  "queued_per_minute value was not found"
+      assert last_response.body.include?("<td>444</td>"),  "performed_per_minute value was not found"
+      assert last_response.body.include?("<td>3.0</td>"),  "pending_per_minute average value was not found"
+    end
+  end
+
+  def test_job_stats_timeseries_minute_filtered
+    Resque::Server.job_stats_to_display = [:queued_per_minute, :pending_per_minute]
+    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+      get '/job_stats_timeseries_minute'
+      assert_equal 200, last_response.status, last_response.body
+      assert last_response.body.include?("AnyJobber"), "job name was not found"
+      assert last_response.body.include?("<td>2013-03-01 01:16:00 UTC</td>"),  "queued_per_minute was not found"
+      assert last_response.body.include?("<td>222</td>"),  "queued_per_minute value was not found"
+      assert !last_response.body.include?("<td>444</td>"),  "performed_per_minute value was not found"
+      assert last_response.body.include?("<td>3.0</td>"),  "pending_per_minute average value was not found"
+    end
+  end
+
+  def test_job_stats_timeseries_hour
+    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+      get '/job_stats_timeseries_hour'
+      assert_equal 200, last_response.status, last_response.body
+      assert last_response.body.include?("AnyJobber"), "job name was not found"
+      assert last_response.body.include?("<td>2013-03-01 01:17:00 UTC</td>"),  "queued_per_hour was not found"
+      assert last_response.body.include?("<td>333</td>"),  "queued_per_hour value was not found"
+      assert last_response.body.include?("<td>555</td>"),  "performed_per_hour value was not found"
+      assert last_response.body.include?("<td>2.33</td>"),  "pending_per_hour average value was not found"
+    end
+  end
+
+  def test_job_stats_timeseries_hour_filtered
+    Resque::Server.job_stats_to_display = [:queued_per_hour]
+    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+      get '/job_stats_timeseries_hour'
+      assert_equal 200, last_response.status, last_response.body
+      assert last_response.body.include?("AnyJobber"), "job name was not found"
+      assert last_response.body.include?("<td>2013-03-01 01:17:00 UTC</td>"),  "queued_per_hour was not found"
+      assert last_response.body.include?("<td>333</td>"),  "queued_per_hour value was not found"
+      assert !last_response.body.include?("<td>555</td>"),  "performed_per_hour value was not found"
+      assert !last_response.body.include?("<td>2.33</td>"),  "pending_per_hour average value was not found"
+    end
+  end
+
+  def test_job_stats_timeseries_hour_filtered_performed
+    Resque::Server.job_stats_to_display = [:performed_per_hour]
+    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+      get '/job_stats_timeseries_hour'
+      assert_equal 200, last_response.status, last_response.body
+      assert last_response.body.include?("AnyJobber"), "job name was not found"
+      assert last_response.body.include?("<td>2013-03-01 01:17:00 UTC</td>"),  "performed_per_hour time was not found"
+      assert !last_response.body.include?("<td>333</td>"),  "queued_per_hour value was not found"
+      assert last_response.body.include?("<td>555</td>"),  "performed_per_hour value was not found"
+      assert !last_response.body.include?("<td>2.33</td>"),  "pending_per_hour average value was not found"
     end
   end
 

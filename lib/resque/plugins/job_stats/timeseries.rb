@@ -97,17 +97,17 @@ end
 module Resque::Plugins::JobStats::Timeseries::Pending
   include Resque::Plugins::JobStats::Timeseries::Common
 
-  # Increments the performed count for the timestamp when job is complete
+  # Increments the pending count for the timestamp when job is complete
   def after_enqueue_job_stats_timeseries_pending(*args)
     incr_timeseries(:pending, Resque.info[:pending])
   end
 
-  # Hash of timeseries data over the last 60 minutes for completed jobs
+  # Hash of timeseries data over the last 60 minutes for pending jobs 
   def pending_per_minute 
     timeseries_data(:pending, 60, :minutes)
   end
 
-  # Hash of timeseries data over the last 24 hours for completed jobs
+  # Hash of timeseries data over the last 24 hours for pending jobs
   def pending_per_hour 
     timeseries_data(:pending, 24, :hours)
   end

@@ -6,8 +6,9 @@ module Resque
       class Statistic
         include Comparable
 
+        TIME_SERIES_STATS = [:queued_per_minute, :performed_per_minute, :pending_per_minute, :queued_per_hour, :performed_per_hour, :pending_per_hour] 
         # An array of the default statistics that will be displayed in the web tab
-        DEFAULT_STATS = [:jobs_enqueued, :jobs_performed, :jobs_failed, :job_rolling_avg, :longest_job]
+        DEFAULT_STATS = [:jobs_enqueued, :jobs_performed, :jobs_failed, :job_rolling_avg, :longest_job].concat(TIME_SERIES_STATS)
 
         attr_accessor *[:job_class].concat(DEFAULT_STATS)
 
