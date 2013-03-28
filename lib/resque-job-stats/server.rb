@@ -52,6 +52,17 @@ module Resque
               @jobs = Resque::Plugins::JobStats::Statistic.find_all(self.class.job_stats_to_display).sort
               erb(File.read(File.join(VIEW_PATH, 'job_stats.erb')))
             end
+
+            app.get '/job_stats.txt' do
+              content_type 'text/plain'
+
+              Resque::Plugins::JobStats::Statistic.find_all(self.class.job_stats_to_display).map do |job|
+                self.class.job_stats_to_display.map do |stat|
+                  "#{job.name}.#{stat}=#{job.send(stat)}"
+                end
+              end.flatten.join("\n")
+            end
+
             # We have little choice in using this funky name - Resque
             # already has a "Stats" tab, and it doesn't like
             # tab names with spaces in it (it translates the url as job%20stats)

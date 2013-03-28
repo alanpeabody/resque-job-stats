@@ -78,6 +78,29 @@ class TestServer < MiniTest::Unit::TestCase
     end
   end
 
+  def test_job_stats_txt
+    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+      get '/job_stats.txt'
+      assert_equal 200, last_response.status, last_response.body
+      assert_equal last_response.body.split("\n").sort, [
+        "AnyJobber.job_rolling_avg=0.3333232",
+        "AnyJobber.jobs_enqueued=111",
+        "AnyJobber.jobs_failed=0",
+        "AnyJobber.jobs_performed=12345",
+        "AnyJobber.longest_job=0.455555"
+      ]
+    end
+  end
+
+  def test_job_stats_txt_filtered
+    Resque::Server.job_stats_to_display = [:longest_job]
+    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+      get '/job_stats.txt'
+      assert_equal 200, last_response.status, last_response.body
+      assert_equal last_response.body, "AnyJobber.longest_job=0.455555"
+    end
+  end
+
   def test_stat_header
     assert_equal "<th>Jobs enqueued</th>", @server.stat_header(:jobs_enqueued)
     assert_equal nil, @server.stat_header(:FOOOOOOO)
