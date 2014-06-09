@@ -24,6 +24,14 @@ class AnyJobber
     def longest_job
       0.455555
     end
+
+    def longest_failed_job
+      0.544444
+    end
+
+    def failed_job_rolling_avg
+      0.2222323
+    end
   end
 end
 
@@ -55,12 +63,15 @@ class TestServer < MiniTest::Unit::TestCase
     Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
       get '/job_stats'
       assert_equal 200, last_response.status, last_response.body
+      open("tmp.html","w"){|f| f.write last_response.body}
       assert last_response.body.include?("<td>AnyJobber</td>"), "job name was not found"
       assert last_response.body.include?("<td>111</td>"), "jobs_enqueued was not found"
       assert last_response.body.include?("<td>12345</td>"), "jobs_performed was not found"
       assert last_response.body.include?("<td></td>"), "jobs_failed was not found"
       assert last_response.body.include?("<td>0.33s</td>"),  "job_rolling_avg was not found"
       assert last_response.body.include?("<td>0.46s</td>"), "longest_job was not found"
+      assert last_response.body.include?("<td>0.22s</td>"),  "failed_job_rolling_avg was not found"
+      assert last_response.body.include?("<td>0.54s</td>"), "longest_failed_job was not found"
     end
   end
 
@@ -75,6 +86,8 @@ class TestServer < MiniTest::Unit::TestCase
       assert !last_response.body.include?("<td></td>"), "jobs_failed was not found"
       assert !last_response.body.include?("<td>0.33s</td>"),  "job_rolling_avg was not found"
       assert last_response.body.include?("<td>0.46s</td>"), "longest_job was not found"
+      assert !last_response.body.include?("<td>0.22s</td>"),  "failed_job_rolling_avg was not found"
+      assert !last_response.body.include?("<td>0.54s</td>"), "longest_failed_job was not found"
     end
   end
 
@@ -83,11 +96,13 @@ class TestServer < MiniTest::Unit::TestCase
       get '/job_stats.txt'
       assert_equal 200, last_response.status, last_response.body
       assert_equal last_response.body.split("\n").sort, [
+        "AnyJobber.failed_job_rolling_avg=0.2222323",
         "AnyJobber.job_rolling_avg=0.3333232",
         "AnyJobber.jobs_enqueued=111",
         "AnyJobber.jobs_failed=0",
         "AnyJobber.jobs_performed=12345",
-        "AnyJobber.longest_job=0.455555"
+        "AnyJobber.longest_failed_job=0.544444",
+        "AnyJobber.longest_job=0.455555",
       ]
     end
   end

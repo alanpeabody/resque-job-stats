@@ -22,6 +22,16 @@ class FailJob < BaseJob
   end
 end
 
+class FailWaitJob < BaseJob
+  extend Resque::Plugins::JobStats
+  @queue = :test
+
+  def self.perform(sleep_time=0.01)
+    sleep sleep_time
+    raise 'fail'
+  end
+end
+
 class CustomDurJob < BaseJob
   extend Resque::Plugins::JobStats::Duration
   @queue = :test
@@ -91,6 +101,25 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_in_delta 0.3, SimpleJob.longest_job, 0.01
     assert_in_delta 0.2, SimpleJob.job_rolling_avg, 0.01
   end
+  
+  def test_duration_failed
+    assert_equal 'stats:jobs:FailWaitJob:duration', FailWaitJob.jobs_duration_key
+    FailWaitJob.reset_job_durations
+    assert_equal 0.0, FailWaitJob.failed_job_rolling_avg
+    assert_equal 0.0, FailWaitJob.longest_job
+
+    3.times do |i|
+      d = (i + 1)/10.0
+      Resque.enqueue(FailWaitJob,d)
+      @worker.work(0)
+    end
+
+    assert_in_delta 0.3, FailWaitJob.failed_job_durations[0], 0.01
+    assert_in_delta 0.2, FailWaitJob.failed_job_durations[1], 0.01
+    assert_in_delta 0.1, FailWaitJob.failed_job_durations[2], 0.01
+    assert_in_delta 0.3, FailWaitJob.longest_failed_job, 0.01
+    assert_in_delta 0.2, FailWaitJob.failed_job_rolling_avg, 0.01
+  end
 
   def test_custom_duration
     CustomDurJob.reset_job_durations
@@ -135,6 +164,6 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
   end
 
   def test_measured_jobs
-    assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
+    assert_equal [SimpleJob, FailWaitJob], Resque::Plugins::JobStats.measured_jobs
   end
 end
