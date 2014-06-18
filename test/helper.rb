@@ -5,6 +5,7 @@ require 'bundler/setup'
 require "minitest/unit"
 require "mocha/mini_test"
 
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -14,6 +15,7 @@ rescue Bundler::BundlerError => e
 end
 require 'minitest/unit'
 require 'minitest/mock'
+require "mocha/mini_test"
 require 'rack/test'
 require 'redgreen'
 require 'resque'

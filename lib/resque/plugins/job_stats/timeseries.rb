@@ -17,8 +17,8 @@ module Resque
 
           private
 
-          TIME_FORMAT = {:minutes => "%d:%H:%M", :hours => "%d:%H"}
-          FACTOR = {:minutes => 1, :hours => 60}
+          TIME_FORMAT = {:minutes => "%d:%H:%M", :hours => "%d:%H", :days => "%Y-%m-%d"}
+          FACTOR = {:minutes => 1, :hours => 60, :days => (24 * 60)}
 
           def range(sample_size, time_unit, end_time) # :nodoc:
             (0..sample_size).map { |n| end_time - (n * 60 * FACTOR[time_unit])}
@@ -43,6 +43,7 @@ module Resque
           def incr_timeseries(type) # :nodoc:
             increx(jobs_timeseries_key(type, timestamp, :minutes), (60 * 61)) # 1h + 1m for some buffer
             increx(jobs_timeseries_key(type, timestamp, :hours), (60 * 60 * 25)) # 24h + 60m for some buffer
+            increx(jobs_timeseries_key(type, timestamp, :days), (24 * 60 * 60 * 32)) # 31d + 1d for some buffer
           end
 
           # Increments a key and sets its expiry time
@@ -73,6 +74,10 @@ module Resque::Plugins::JobStats::Timeseries::Enqueued
   def queued_per_hour
     timeseries_data(:enqueued, 24, :hours)
   end
+
+  def queued_per_day
+    timeseries_data(:enqueued, 31, :days)
+  end
 end
 
 module Resque::Plugins::JobStats::Timeseries::Performed
@@ -91,5 +96,9 @@ module Resque::Plugins::JobStats::Timeseries::Performed
   # Hash of timeseries data over the last 24 hours for completed jobs
   def performed_per_hour
     timeseries_data(:performed, 24, :hours)
+  end
+
+  def performed_per_day
+    timeseries_data(:performed, 31, :days)
   end
 end

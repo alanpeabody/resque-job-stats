@@ -85,11 +85,11 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
       @worker.work(0)
     end
 
-    assert_in_delta 0.3, SimpleJob.job_durations[0], 0.01
-    assert_in_delta 0.2, SimpleJob.job_durations[1], 0.01
-    assert_in_delta 0.1, SimpleJob.job_durations[2], 0.01
-    assert_in_delta 0.3, SimpleJob.longest_job, 0.01
-    assert_in_delta 0.2, SimpleJob.job_rolling_avg, 0.01
+    assert_in_delta 0.3, SimpleJob.job_durations[0], 0.05
+    assert_in_delta 0.2, SimpleJob.job_durations[1], 0.05
+    assert_in_delta 0.1, SimpleJob.job_durations[2], 0.05
+    assert_in_delta 0.3, SimpleJob.longest_job, 0.05
+    assert_in_delta 0.2, SimpleJob.job_rolling_avg, 0.05
   end
 
   def test_custom_duration
@@ -105,8 +105,8 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
       @worker.work(0)
     end
 
-    assert_in_delta 0.1, CustomDurJob.longest_job, 0.01
-    assert_in_delta 0.1, CustomDurJob.job_rolling_avg, 0.01
+    assert_in_delta 0.1, CustomDurJob.longest_job, 0.05
+    assert_in_delta 0.1, CustomDurJob.job_rolling_avg, 0.05
   end
 
   def test_perform_timeseries
@@ -132,6 +132,27 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_equal 0, SimpleJob.queued_per_minute[(time + 60)]
     assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
     Timecop.return
+  end
+
+  def test_enqueue_timeseries_per_day
+    time = SimpleJob.timestamp
+    Timecop.freeze(time)
+    Resque.enqueue(SimpleJob,0)
+    Timecop.freeze(time + 24 * 60 * 60)
+    @worker.work(0)
+    Resque.enqueue(SimpleJob, 0)
+    Resque.enqueue(SimpleJob, 0)
+    Timecop.freeze(time + 24 * 60 * 60 * 2)
+    @worker.work(0)
+    @worker.work(0)
+    Timecop.freeze(time + 24 * 60 * 60 * 3)
+    assert_equal 1, SimpleJob.queued_per_day[time]
+    assert_equal 2, SimpleJob.queued_per_day[(time + 24 * 60 * 60)]
+    assert_equal 0, SimpleJob.queued_per_day[(time + 24 * 60 * 60 * 2)]
+
+    assert_equal 0, SimpleJob.performed_per_day[time]
+    assert_equal 1, SimpleJob.performed_per_day[(time + 24 * 60 * 60)]
+    assert_equal 2, SimpleJob.performed_per_day[(time + 24 * 60 * 60 * 2)]
   end
 
   def test_measured_jobs
