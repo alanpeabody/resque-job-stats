@@ -134,6 +134,27 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     Timecop.return
   end
 
+  def test_enqueue_timeseries_per_day
+    time = SimpleJob.timestamp
+    Timecop.freeze(time)
+    Resque.enqueue(SimpleJob,0)
+    Timecop.freeze(time + 24 * 60 * 60)
+    @worker.work(0)
+    Resque.enqueue(SimpleJob, 0)
+    Resque.enqueue(SimpleJob, 0)
+    Timecop.freeze(time + 24 * 60 * 60 * 2)
+    @worker.work(0)
+    @worker.work(0)
+    Timecop.freeze(time + 24 * 60 * 60 * 3)
+    assert_equal 1, SimpleJob.queued_per_day[time]
+    assert_equal 2, SimpleJob.queued_per_day[(time + 24 * 60 * 60)]
+    assert_equal 0, SimpleJob.queued_per_day[(time + 24 * 60 * 60 * 2)]
+
+    assert_equal 0, SimpleJob.performed_per_day[time]
+    assert_equal 1, SimpleJob.performed_per_day[(time + 24 * 60 * 60)]
+    assert_equal 2, SimpleJob.performed_per_day[(time + 24 * 60 * 60 * 2)]
+  end
+
   def test_measured_jobs
     assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
   end
