@@ -1,7 +1,7 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'helper'))
 require 'resque-job-stats/server'
 
-# A pretend job that has all of the statistics we want to display (i.e. extends 
+# A pretend job that has all of the statistics we want to display (i.e. extends
 # Resque::Plugins::JobStats)
 class AnyJobber
   class << self
@@ -43,7 +43,7 @@ class TestServer < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
   def setup
-    Resque::Server.job_stats_to_display = Resque::Plugins::JobStats::Statistic::DEFAULT_STATS 
+    Resque::Server.job_stats_to_display = Resque::Plugins::JobStats::Statistic::DEFAULT_STATS
     @server = MyServer.new
   end
 
@@ -52,7 +52,7 @@ class TestServer < MiniTest::Unit::TestCase
   end
 
   def test_job_stats
-    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+    Resque::Plugins::JobStats.stubs :measured_jobs => [AnyJobber] do
       get '/job_stats'
       assert_equal 200, last_response.status, last_response.body
       assert last_response.body.include?("<td>AnyJobber</td>"), "job name was not found"
@@ -66,7 +66,7 @@ class TestServer < MiniTest::Unit::TestCase
 
   def test_job_stats_filtered
     Resque::Server.job_stats_to_display = [:longest_job]
-    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
+    Resque::Plugins::JobStats.stubs :measured_jobs => [AnyJobber] do
       get '/job_stats'
       assert_equal 200, last_response.status, last_response.body
       assert last_response.body.include?("<td>AnyJobber</td>"), "job name was not found"
@@ -89,7 +89,7 @@ class TestServer < MiniTest::Unit::TestCase
   end
 
   def test_job_sorting
-    Resque::Plugins::JobStats.stub :measured_jobs, [YetAnotherJobber, AnyJobber] do
+    Resque::Plugins::JobStats.stubs :measured_jobs => [YetAnotherJobber, AnyJobber] do
       get '/job_stats'
       assert_equal 200, last_response.status, last_response.body
       assert(last_response.body =~ /AnyJobber(.|\n)+YetAnotherJobber/, "AnyJobber should be found before YetAnotherJobber")
