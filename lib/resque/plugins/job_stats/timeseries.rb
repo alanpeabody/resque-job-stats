@@ -43,7 +43,7 @@ module Resque
           def incr_timeseries(type) # :nodoc:
             increx(jobs_timeseries_key(type, timestamp, :minutes), (60 * 61)) # 1h + 1m for some buffer
             increx(jobs_timeseries_key(type, timestamp, :hours), (60 * 60 * 25)) # 24h + 60m for some buffer
-            increx(jobs_timeseries_key(type, timestamp, :days), (24 * 60 * 60 * 32)) # 31d + 1d for some buffer
+            increx(jobs_timeseries_key(type, timestamp, :days), (24 * 60 * 60 * 91)) # 90d + 1d for some buffer
           end
 
           # Increments a key and sets its expiry time
