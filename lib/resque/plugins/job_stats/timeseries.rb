@@ -11,8 +11,8 @@ module Resque
         module Common
           # A timestamp rounded to the lowest minute
           def timestamp
-            time = Time.now
-            Time.at(time.to_i - time.sec)   # to_i removes usecs
+            time = Time.now.utc
+            Time.at(time.to_i - time.sec).utc   # to_i removes usecs
           end
 
           private
