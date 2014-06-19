@@ -11,8 +11,8 @@ module Resque
         module Common
           # A timestamp rounded to the lowest minute
           def timestamp
-            time = Time.now.local
-            Time.at(time.to_i - time.sec).local   # to_i removes usecs
+            time = Time.now
+            Time.at(time.to_i - time.sec)   # to_i removes usecs
           end
 
           private
@@ -24,20 +24,20 @@ module Resque
             (0..sample_size).map { |n| end_time - (n * 60 * FACTOR[time_unit])}
           end
 
-          def timeseries_data(type, sample_size, time_unit) # :nodoc:
+          def timeseries_data(type, sample_size, time_unit, job_name = self.name) # :nodoc:
             timeseries_range = range(sample_size, time_unit, timestamp)
-            timeseries_keys = timeseries_range.map { |time| jobs_timeseries_key(type, time, time_unit)}
+            timeseries_keys = timeseries_range.map { |time| jobs_timeseries_key(type, time, time_unit, job_name)}
             timeseries_data = Resque.redis.mget(*(timeseries_keys))
 
             return Hash[(0..sample_size).map { |i| [timeseries_range[i], timeseries_data[i].to_i]}]
           end
 
-          def jobs_timeseries_key(type, key_time, time_unit) # :nodoc:
-            "#{prefix}:#{type}:#{key_time.strftime(TIME_FORMAT[time_unit])}"
+          def jobs_timeseries_key(type, key_time, time_unit, job_name = self.name) # :nodoc:
+            "#{prefix(job_name)}:#{type}:#{key_time.strftime(TIME_FORMAT[time_unit])}"
           end
 
-          def prefix # :nodoc:
-            "stats:jobs:#{self.name}:timeseries"
+          def prefix(job_name = self.name)
+            "stats:jobs:#{job_name}:timeseries"
           end
 
           def incr_timeseries(type) # :nodoc:
@@ -76,7 +76,7 @@ module Resque::Plugins::JobStats::Timeseries::Enqueued
   end
 
   def queued_per_day
-    timeseries_data(:enqueued, 31, :days)
+    timeseries_data(:enqueued, 90, :days)
   end
 end
 
@@ -99,6 +99,6 @@ module Resque::Plugins::JobStats::Timeseries::Performed
   end
 
   def performed_per_day
-    timeseries_data(:performed, 31, :days)
+    timeseries_data(:performed, 90, :days)
   end
 end
