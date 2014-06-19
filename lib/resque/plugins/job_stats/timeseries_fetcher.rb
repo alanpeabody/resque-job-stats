@@ -10,11 +10,11 @@ module Resque
           timeseries_data(:performed, 60, :minutes, job_name)
         end
 
-        def performed_per_hour(job_name)
+        def self.performed_per_hour(job_name)
           timeseries_data(:performed, 24, :hours, job_name)
         end
 
-        def performed_per_day(job_name)
+        def self.performed_per_day(job_name)
           timeseries_data(:performed, 90, :days, job_name)
         end
 
