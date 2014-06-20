@@ -49,7 +49,7 @@ module Resque
         class << self
           def registered(app)
             app.get '/job_stats' do
-              @jobs = Resque::Plugins::JobStats::StatisticFetcher.all_job_names
+              @jobs = Resque::Plugins::JobStats::StatisticFetcher.statistic_fetcher_for_all_jobs
               erb(File.read(File.join(VIEW_PATH, 'job_stats.erb')))
             end
             # We have little choice in using this funky name - Resque

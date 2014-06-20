@@ -5,14 +5,14 @@ module Resque
       # job classes
       class StatisticFetcher
 
-        # Get all job names from redis
-        def self.all_job_names
+        # Get a StatisticFetcher for all jobs
+        def self.statistic_fetcher_for_all_jobs
           job_names = Set.new
           Resque.keys.each do |key|
             /\Astats:jobs:(.*):timeseries:.+\z/.match(key)
             job_names << $1 if $1
           end
-          job_names.to_a.sort
+          job_names.to_a.sort.map { |job_name| StatisticFetcher.new(job_name)}
         end
 
         include Resque::Plugins::JobStats::Duration
