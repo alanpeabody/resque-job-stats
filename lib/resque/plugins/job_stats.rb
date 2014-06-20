@@ -5,6 +5,7 @@ require 'resque/plugins/job_stats/failed'
 require 'resque/plugins/job_stats/duration'
 require 'resque/plugins/job_stats/timeseries'
 require 'resque/plugins/job_stats/statistic'
+require 'resque/plugins/job_stats/statistic_fetcher'
 
 module Resque
   module Plugins
