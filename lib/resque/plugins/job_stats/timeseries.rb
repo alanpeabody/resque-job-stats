@@ -50,6 +50,10 @@ module Resque
             Resque.redis.incr(key)
             Resque.redis.expire(key, ttl)
           end
+
+          def timeseries_recorded?
+            @timeseries_recorded.nil? ? true : !!@timeseries_recorded
+          end
         end
       end
     end
@@ -61,7 +65,7 @@ module Resque::Plugins::JobStats::Timeseries::Enqueued
 
   # Increments the enqueued count for the timestamp when job is queued
   def after_enqueue_job_stats_timeseries(*args)
-    incr_timeseries(:enqueued)
+    incr_timeseries(:enqueued) if timeseries_recorded?
   end
 
   # Hash of timeseries data over the last 60 minutes for queued jobs
@@ -80,7 +84,7 @@ module Resque::Plugins::JobStats::Timeseries::Performed
 
   # Increments the performed count for the timestamp when job is complete
   def after_perform_job_stats_timeseries(*args)
-    incr_timeseries(:performed)
+    incr_timeseries(:performed) if timeseries_recorded?
   end
 
   # Hash of timeseries data over the last 60 minutes for completed jobs

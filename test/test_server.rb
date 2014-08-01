@@ -24,6 +24,14 @@ class AnyJobber
     def longest_job
       0.455555
     end
+
+    def job_memory_usage_rolling_avg
+      1.23456789
+    end
+
+    def job_memory_usage_max
+      2.3456789
+    end
   end
 end
 

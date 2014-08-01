@@ -12,15 +12,19 @@
     <%= stat_header(:jobs_failed) %>
     <%= stat_header(:job_rolling_avg) %>
     <%= stat_header(:longest_job) %>
+    <%= stat_header(:job_memory_usage_rolling_avg) %>
+    <%= stat_header(:job_memory_usage_max) %>
   </tr>
   <% @jobs.each do |job| %>
     <tr>
-      <td><%= job.name %></td>      
+      <td><%= job.name %></td>
       <%= display_stat(job, :jobs_enqueued,   :number_display) %>
       <%= display_stat(job, :jobs_performed,  :number_display) %>
       <%= display_stat(job, :jobs_failed,     :number_display) %>
       <%= display_stat(job, :job_rolling_avg, :time_display) %>
       <%= display_stat(job, :longest_job,     :time_display) %>
+      <%= display_stat(job, :job_memory_usage_rolling_avg, :memory_display) %>
+      <%= display_stat(job, :job_memory_usage_max,     :memory_display) %>
     </tr>
   <% end %>
 </table>
