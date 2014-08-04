@@ -20,14 +20,12 @@ module Resque
 
         # Increments the failed count when job is complete
         def around_perform_job_stats_memory_usage(*args)
-          # Lets zero out stats by triggering full GC sweep that will
-          # elimitate any benefit of copy-on-write forking strategy
-          GC.start
           # start will usually be equal to amount of memory Rails uses
           # on startup
-          start = NewRelic::Agent::Samplers::MemorySampler.new.sampler.get_sample
+          start = collect_memory_usage
           yield
-          finish = NewRelic::Agent::Samplers::MemorySampler.new.sampler.get_sample
+          finish = collect_memory_usage
+
           memory_usage = finish - start
 
           Resque.redis.lpush(jobs_memory_usage_key, memory_usage)
@@ -46,6 +44,22 @@ module Resque
 
         def job_memory_usage_max
           job_memory_usages.max.to_f
+        end
+
+        private
+
+        def collect_memory_usage
+          if defined?(NewRelic)
+            # The implementation prefers in-process counters where
+            # available (jruby), use the /proc/#{$$}/status on Linux,
+            # and fall back to ps everywhere else (different ps options
+            # on different platforms).
+            NewRelic::Agent::Samplers::MemorySampler.new.sampler.get_sample
+          else
+            -1
+            # Can not afford to fail here because ALL stats are ALWAYS collected
+            # fail 'Newrelic gem is required in order to collect memory usage stats '
+          end
         end
       end
     end
