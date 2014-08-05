@@ -2,7 +2,6 @@ module Resque
   module Plugins
     module JobStats
       module MemoryUsage
-
         # Resets all job memory_usages
         def reset_job_memory_usages
           Resque.redis.del(jobs_memory_usages_key)
@@ -10,7 +9,7 @@ module Resque
 
         # Returns the number of jobs failed
         def job_memory_usages
-          Resque.redis.lrange(jobs_memory_usage_key,0,memory_usages_recorded - 1).map(&:to_f)
+          Resque.redis.lrange(jobs_memory_usage_key, 0, -1).map(&:to_f)
         end
 
         # Returns the key used for tracking job memory_usages
@@ -29,12 +28,14 @@ module Resque
           memory_usage = finish - start
 
           Resque.redis.lpush(jobs_memory_usage_key, memory_usage)
-          Resque.redis.ltrim(jobs_memory_usage_key, 0, memory_usages_recorded)
+          Resque.redis.ltrim(jobs_memory_usage_key, 0, memory_usages_recorded - 1)
         end
 
         def memory_usages_recorded
           @memory_usages_recorded || 100
         end
+
+        attr_writer :memory_usages_recorded
 
         def job_memory_usage_rolling_avg
           job_times = job_memory_usages

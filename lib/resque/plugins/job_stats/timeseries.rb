@@ -15,6 +15,10 @@ module Resque
             Time.at(time.to_i - time.sec).utc   # to_i removes usecs
           end
 
+          def disable_timeseries
+            @disable_timeseries = true
+          end
+
           private
 
           TIME_FORMAT = {:minutes => "%d:%H:%M", :hours => "%d:%H"}
@@ -52,7 +56,8 @@ module Resque
           end
 
           def timeseries_recorded?
-            @timeseries_recorded.nil? ? true : !!@timeseries_recorded
+            # compare with 'true' to discourage setting attribute to 'truthy' values
+            @disable_timeseries != true
           end
         end
       end
