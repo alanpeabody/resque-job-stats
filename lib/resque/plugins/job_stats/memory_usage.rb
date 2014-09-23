@@ -21,14 +21,19 @@ module Resque
         def around_perform_job_stats_memory_usage(*args)
           # start will usually be equal to amount of memory Rails uses
           # on startup
+          @last_recorded_memory_usage = nil
           start = collect_memory_usage
           yield
           finish = collect_memory_usage
 
-          memory_usage = finish - start
+          if start && finish # sometimes memory usage collection fails
+            memory_usage = finish - start
 
-          Resque.redis.lpush(jobs_memory_usage_key, memory_usage)
-          Resque.redis.ltrim(jobs_memory_usage_key, 0, memory_usages_recorded - 1)
+            Resque.redis.lpush(jobs_memory_usage_key, memory_usage)
+            Resque.redis.ltrim(jobs_memory_usage_key, 0, memory_usages_recorded - 1)
+
+            @last_recorded_memory_usage = memory_usage # just in case some app code wants access to this data
+          end
         end
 
         def memory_usages_recorded
@@ -57,7 +62,7 @@ module Resque
             # on different platforms).
             NewRelic::Agent::Samplers::MemorySampler.new.sampler.get_sample
           else
-            -1
+            nil
             # Can not afford to fail here because ALL stats are ALWAYS collected
             # fail 'Newrelic gem is required in order to collect memory usage stats '
           end
