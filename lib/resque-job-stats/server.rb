@@ -32,6 +32,10 @@ module Resque
             num.zero? ? "" : num
           end
 
+          def memory_display(mem)
+            mem.zero? ? "" : ("%.2f" % mem) + "MB"
+          end
+
           def stat_header(stat_name)
             if(display_stat?(stat_name))
               "<th>" + stat_name.to_s.gsub(/_/,' ').capitalize + "</th>"

@@ -24,6 +24,14 @@ class AnyJobber
     def longest_job
       0.455555
     end
+
+    def job_memory_usage_rolling_avg
+      1.23456789
+    end
+
+    def job_memory_usage_max
+      2.3456789
+    end
   end
 end
 
@@ -52,29 +60,33 @@ class TestServer < MiniTest::Unit::TestCase
   end
 
   def test_job_stats
-    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
-      get '/job_stats'
-      assert_equal 200, last_response.status, last_response.body
-      assert last_response.body.include?("<td>AnyJobber</td>"), "job name was not found"
-      assert last_response.body.include?("<td>111</td>"), "jobs_enqueued was not found"
-      assert last_response.body.include?("<td>12345</td>"), "jobs_performed was not found"
-      assert last_response.body.include?("<td></td>"), "jobs_failed was not found"
-      assert last_response.body.include?("<td>0.33s</td>"),  "job_rolling_avg was not found"
-      assert last_response.body.include?("<td>0.46s</td>"), "longest_job was not found"
+    Resque::Plugins::JobStats::Statistic.stub :measured_jobs, ['AnyJobber'] do
+      Resque::Plugins::JobStats::Statistic.stub :measurable_entity, AnyJobber do
+        get '/job_stats'
+        assert_equal 200, last_response.status, last_response.body
+        assert last_response.body.include?("<td>AnyJobber</td>"), "job name was not found"
+        assert last_response.body.include?("<td>111</td>"), "jobs_enqueued was not found"
+        assert last_response.body.include?("<td>12345</td>"), "jobs_performed was not found"
+        assert last_response.body.include?("<td></td>"), "jobs_failed was not found"
+        assert last_response.body.include?("<td>0.33s</td>"),  "job_rolling_avg was not found"
+        assert last_response.body.include?("<td>0.46s</td>"), "longest_job was not found"
+      end
     end
   end
 
   def test_job_stats_filtered
     Resque::Server.job_stats_to_display = [:longest_job]
-    Resque::Plugins::JobStats.stub :measured_jobs, [AnyJobber] do
-      get '/job_stats'
-      assert_equal 200, last_response.status, last_response.body
-      assert last_response.body.include?("<td>AnyJobber</td>"), "job name was not found"
-      assert !last_response.body.include?("<td>111</td>"), "jobs_enqueued was not found"
-      assert !last_response.body.include?("<td>12345</td>"), "jobs_performed was not found"
-      assert !last_response.body.include?("<td></td>"), "jobs_failed was not found"
-      assert !last_response.body.include?("<td>0.33s</td>"),  "job_rolling_avg was not found"
-      assert last_response.body.include?("<td>0.46s</td>"), "longest_job was not found"
+    Resque::Plugins::JobStats::Statistic.stub :measured_jobs, ['AnyJobber'] do
+      Resque::Plugins::JobStats::Statistic.stub :measurable_entity, AnyJobber do
+        get '/job_stats'
+        assert_equal 200, last_response.status, last_response.body
+        assert last_response.body.include?("<td>AnyJobber</td>"), "job name was not found"
+        assert !last_response.body.include?("<td>111</td>"), "jobs_enqueued was not found"
+        assert !last_response.body.include?("<td>12345</td>"), "jobs_performed was not found"
+        assert !last_response.body.include?("<td></td>"), "jobs_failed was not found"
+        assert !last_response.body.include?("<td>0.33s</td>"),  "job_rolling_avg was not found"
+        assert last_response.body.include?("<td>0.46s</td>"), "longest_job was not found"
+      end
     end
   end
 
@@ -89,7 +101,7 @@ class TestServer < MiniTest::Unit::TestCase
   end
 
   def test_job_sorting
-    Resque::Plugins::JobStats.stub :measured_jobs, [YetAnotherJobber, AnyJobber] do
+    Resque::Plugins::JobStats::Statistic.stub :measured_jobs, ['YetAnotherJobber', 'AnyJobber'] do
       get '/job_stats'
       assert_equal 200, last_response.status, last_response.body
       assert(last_response.body =~ /AnyJobber(.|\n)+YetAnotherJobber/, "AnyJobber should be found before YetAnotherJobber")

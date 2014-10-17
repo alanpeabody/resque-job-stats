@@ -133,8 +133,4 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_equal 1, SimpleJob.performed_per_minute[(time + 60)]
     Timecop.return
   end
-
-  def test_measured_jobs
-    assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
-  end
 end

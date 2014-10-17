@@ -15,6 +15,10 @@ module Resque
             Time.at(time.to_i - time.sec).utc   # to_i removes usecs
           end
 
+          def disable_timeseries
+            @disable_timeseries = true
+          end
+
           private
 
           TIME_FORMAT = {:minutes => "%d:%H:%M", :hours => "%d:%H"}
@@ -50,6 +54,11 @@ module Resque
             Resque.redis.incr(key)
             Resque.redis.expire(key, ttl)
           end
+
+          def timeseries_recorded?
+            # compare with 'true' to discourage setting attribute to 'truthy' values
+            @disable_timeseries != true
+          end
         end
       end
     end
@@ -61,7 +70,7 @@ module Resque::Plugins::JobStats::Timeseries::Enqueued
 
   # Increments the enqueued count for the timestamp when job is queued
   def after_enqueue_job_stats_timeseries(*args)
-    incr_timeseries(:enqueued)
+    incr_timeseries(:enqueued) if timeseries_recorded?
   end
 
   # Hash of timeseries data over the last 60 minutes for queued jobs
@@ -80,7 +89,7 @@ module Resque::Plugins::JobStats::Timeseries::Performed
 
   # Increments the performed count for the timestamp when job is complete
   def after_perform_job_stats_timeseries(*args)
-    incr_timeseries(:performed)
+    incr_timeseries(:performed) if timeseries_recorded?
   end
 
   # Hash of timeseries data over the last 60 minutes for completed jobs

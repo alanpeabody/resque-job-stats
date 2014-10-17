@@ -1,28 +1,13 @@
+# loaded by resque-web 'automagically' to initialize plugin UI
+
 require 'resque'
-require 'resque/plugins/job_stats/performed'
-require 'resque/plugins/job_stats/enqueued'
-require 'resque/plugins/job_stats/failed'
-require 'resque/plugins/job_stats/duration'
-require 'resque/plugins/job_stats/timeseries'
+require 'resque/plugins/job_stats/all'
 require 'resque/plugins/job_stats/statistic'
 
 module Resque
   module Plugins
     module JobStats
-      include Resque::Plugins::JobStats::Performed
-      include Resque::Plugins::JobStats::Enqueued
-      include Resque::Plugins::JobStats::Failed
-      include Resque::Plugins::JobStats::Duration
-      include Resque::Plugins::JobStats::Timeseries::Enqueued
-      include Resque::Plugins::JobStats::Timeseries::Performed
-
-      def self.extended(base)
-        self.measured_jobs << base
-      end
-
-      def self.measured_jobs
-        @measured_jobs ||= []
-      end
+      include Resque::Plugins::JobStats::All
     end
   end
 end
