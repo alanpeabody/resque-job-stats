@@ -66,6 +66,10 @@ module Resque
             # Can not afford to fail here because ALL stats are ALWAYS collected
             # fail 'Newrelic gem is required in order to collect memory usage stats '
           end
+        rescue NewRelic::Agent::Sampler::Unsupported
+          # raised often when restarting workers because they are not allowed
+          # to spawn ps/grep processes when they where already asked to stop
+          nil
         end
       end
     end
