@@ -7,7 +7,7 @@ module Resque
         include Comparable
 
         # An array of the default statistics that will be displayed in the web tab
-        DEFAULT_STATS = [:jobs_enqueued, :jobs_performed, :jobs_failed, :job_rolling_avg, :longest_job]
+        DEFAULT_STATS = [:jobs_enqueued, :jobs_performed, :jobs_failed, :job_rolling_avg, :longest_job, :failed_job_rolling_avg, :longest_failed_job]
 
         attr_accessor *[:job_class].concat(DEFAULT_STATS)
 
