@@ -53,6 +53,7 @@ Alternatively you can include just the metric you wish to record.
     extend Resque::Plugins::JobStats::Duration
     extend Resque::Plugins::JobStats::Timeseries::Enqueued
     extend Resque::Plugins::JobStats::Timeseries::Performed
+    extend Resque::Plugins::JobStats::Timeseries::Pending  # Note: you must include the Enqueued module along with this to get the Pending stats 
 
     @queue = :my_job
     def self.perform(*args)

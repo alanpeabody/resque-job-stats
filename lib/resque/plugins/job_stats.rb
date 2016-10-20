@@ -15,6 +15,7 @@ module Resque
       include Resque::Plugins::JobStats::Duration
       include Resque::Plugins::JobStats::Timeseries::Enqueued
       include Resque::Plugins::JobStats::Timeseries::Performed
+      include Resque::Plugins::JobStats::Timeseries::Pending
 
       def self.extended(base)
         self.measured_jobs << base

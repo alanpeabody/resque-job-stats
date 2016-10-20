@@ -40,14 +40,14 @@ module Resque
             "stats:jobs:#{self.name}:timeseries"
           end
 
-          def incr_timeseries(type) # :nodoc:
-            increx(jobs_timeseries_key(type, timestamp, :minutes), (60 * 61)) # 1h + 1m for some buffer
-            increx(jobs_timeseries_key(type, timestamp, :hours), (60 * 60 * 25)) # 24h + 60m for some buffer
+          def incr_timeseries(type, value=1) # :nodoc:
+            increx(jobs_timeseries_key(type, timestamp, :minutes), (60 * 61), value) # 1h + 1m for some buffer
+            increx(jobs_timeseries_key(type, timestamp, :hours), (60 * 60 * 25), value) # 24h + 60m for some buffer
           end
 
           # Increments a key and sets its expiry time
-          def increx(key, ttl)
-            Resque.redis.incr(key)
+          def increx(key, ttl, value)
+            Resque.redis.incrby(key, value)
             Resque.redis.expire(key, ttl)
           end
         end
@@ -91,5 +91,24 @@ module Resque::Plugins::JobStats::Timeseries::Performed
   # Hash of timeseries data over the last 24 hours for completed jobs
   def performed_per_hour
     timeseries_data(:performed, 24, :hours)
+  end
+end
+
+module Resque::Plugins::JobStats::Timeseries::Pending
+  include Resque::Plugins::JobStats::Timeseries::Common
+
+  # Increments the pending count for the timestamp when job is complete
+  def after_enqueue_job_stats_timeseries_pending(*args)
+    incr_timeseries(:pending, Resque.info[:pending])
+  end
+
+  # Hash of timeseries data over the last 60 minutes for pending jobs 
+  def pending_per_minute 
+    timeseries_data(:pending, 60, :minutes)
+  end
+
+  # Hash of timeseries data over the last 24 hours for pending jobs
+  def pending_per_hour 
+    timeseries_data(:pending, 24, :hours)
   end
 end

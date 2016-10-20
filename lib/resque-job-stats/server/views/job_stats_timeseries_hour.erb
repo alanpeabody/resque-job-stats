@@ -1,0 +1,30 @@
+<%= layout_header %>
+
+<table>
+  <% @jobs.each do |job| %>
+   <tr>
+     <th colspan=4>Job: <%= job.name %></th>
+   </tr>
+   <tr>
+    <th>Time (hours)</th>
+    <%= stat_header(:queued_per_hour) %>
+    <%= stat_header(:performed_per_hour) %>
+    <%= stat_header(:pending_per_hour) %>
+  </tr>
+
+   <tr>
+      <% timeseries_iterator(job, "hour").each do |hour| %>
+        <tr>
+          <td><%= hour.first %></td>
+          <%= timeseries_lookup(job, :queued_per_hour, hour.first) %>
+          <%= timeseries_lookup(job, :performed_per_hour, hour.first) %>
+          <%= pending_average(job, :pending_per_hour, :queued_per_hour, hour.first) %>
+        </tr>
+      <% end %>
+    </tr>
+  <% end %>
+</table>
+
+<p class="intro">
+  Note: Pending data is an average for the time period. (1.0 is the basis, meaning there is no wait for a worker)
+</p>
