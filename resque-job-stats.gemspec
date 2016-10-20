@@ -7,7 +7,6 @@ Gem::Specification.new do |s|
   s.version = "#{Resque::Plugins::JobStats::VERSION}"
 
   s.authors = ["alanpeabody"]
-  s.date = "2012-06-22"
   s.description = "Tracks jobs performed, failed, and the duration of the last 100 jobs for each job type."
   s.email = "gapeabody@gmail.com"
   s.extra_rdoc_files = [
