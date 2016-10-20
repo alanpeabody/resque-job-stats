@@ -2,6 +2,10 @@
 
 ## Master
 
+## 0.4.2
+
+* Fix missing ERB files in gemspec (e30e599)
+
 ## 0.4.1
 
 * Remove `date` from gemspec (31e054b)
