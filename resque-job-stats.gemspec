@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
   files = `git ls-files`.split("\n") rescue []
   files &= (
-    Dir['lib/**/*.{rb}'] +
+    Dir['lib/**/*.{rb,erb}'] +
     Dir['*.rdoc'])
 
   s.files         = files
