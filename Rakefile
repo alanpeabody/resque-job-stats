@@ -5,6 +5,8 @@ require "bundler/gem_tasks"
 require 'rake'
 require 'rake/testtask'
 
+require File.dirname(__FILE__) + '/lib/resque-job-stats'
+
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
   test.pattern = 'test/**/test_*.rb'
@@ -15,7 +17,7 @@ task :default => :test
 
 require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+  version = Resque::Plugins::JobStats::VERSION
 
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "resque-job-stats #{version}"

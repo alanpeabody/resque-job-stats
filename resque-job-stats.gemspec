@@ -11,13 +11,13 @@ Gem::Specification.new do |s|
   s.email = "gapeabody@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.md"
   ]
 
   files = `git ls-files`.split("\n") rescue []
   files &= (
     Dir['lib/**/*.{rb,erb}'] +
-    Dir['*.rdoc'])
+    Dir['*.md'])
 
   s.files         = files
   s.require_paths = ["lib"]
