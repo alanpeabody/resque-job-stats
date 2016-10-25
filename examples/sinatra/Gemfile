@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+
+gem "rake"
+gem "sinatra"
+gem "resque"
+gem "resque-job-stats", path: "../../"
