@@ -1,0 +1,22 @@
+require './job'
+require 'resque'
+require 'redis'
+require "resque/tasks"
+
+Resque.redis = Redis.new 
+
+desc "Enqueue successful job"
+task :enqueue_success do
+  count = ENV['SUCCESS_JOBS'] || 1
+  count.to_i.times do
+    Resque.enqueue(Job, {})
+  end
+end
+
+desc "Enqueue failing job"
+task :enqueue_failure do
+  count = ENV['FAILURE_JOBS'] || 1
+  count.to_i.times do
+    Resque.enqueue(FailingJob, {})
+  end
+end
