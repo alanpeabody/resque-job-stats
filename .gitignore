@@ -48,3 +48,5 @@ Gemfile.lock
 
 # For rubinius:
 #*.rbc
+
+dump.rdb
