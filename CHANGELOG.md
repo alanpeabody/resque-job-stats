@@ -2,6 +2,8 @@
 
 ## Master
 
+* Add example app (#27, 158f466)
+
 ## 0.4.2
 
 * Fix missing ERB files in gemspec (e30e599)
