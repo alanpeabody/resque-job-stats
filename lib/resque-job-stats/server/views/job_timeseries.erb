@@ -1,0 +1,179 @@
+<h1>Resque Job Timeseries</h1>
+
+<p class="intro">
+  This page displays timeseries data for jobs.
+</p>
+
+<h2><code><%= @job_class %></code></h2>
+<% if @interval == 'hour' %>
+  <p>View by: <strong style="font-weight: bold">hour</strong> | <a href="<%= @toggle_interval_url %>">minute</a></p>
+<% else %>
+  <p>View by: <a href="<%= @toggle_interval_url %>">hour</a> | <strong style="font-weight: bold">minute</strong></p>
+<% end %>
+
+<svg style="margin: 1em 0;" id="performed-graph"></svg>
+<svg style="margin: 1em 0;" id="enqueued-graph"></svg>
+
+<% if @performed %>
+  <h3 style="font-size: 1.2em; margin: 2em 0 1em;">Performed</h3>
+  <table>
+    <tr>
+      <th>Time</th>
+      <th>Count</th>
+    </tr>
+    <% @performed.each do |k, v| %>
+      <tr>
+        <td><span class="time"><%= k %></span></td>
+        <td><%= v == 0 ? '-' : v %></td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
+
+<% if @enqueued %>
+  <h3 style="font-size: 1.2em; margin: 2em 0 1em;">Enqueued</h3>
+  <table>
+    <tr>
+      <th>Time</th>
+      <th>Count</th>
+    </tr>
+    <% @enqueued.each do |k, v| %>
+      <tr>
+        <td><span class="time"><%= k %></span></td>
+        <td><%= v == 0 ? '-' : v %></td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
+
+<script>
+var enqueued = <%= @enqueued.to_json %>;
+var performed = <%= @performed.to_json %>;
+var interval = "<%= @interval %>";
+
+$(document).ready(function() {
+  'use strict';
+
+  var parseDate = d3.isoParse;
+
+  var TimeseriesGraph = function(rawData, title, interval) {
+    this.graphTitle = title;
+    this.padding = {top: 20, right: 20, bottom: 20, left: 40};
+    this.margin = {top: 30, right: 20, bottom: 10, left: 50};
+    this.width = 600 - this.margin.left - this.margin.right - this.padding.left - this.padding.right;
+    this.height = 270 - this.margin.top - this.margin.bottom - this.padding.top - this.padding.bottom;
+    this.outerWidth = this.width + this.margin.left + this.margin.right + this.padding.left + this.padding.right;
+    this.outerHeight = this.height + this.margin.top + this.margin.bottom + this.padding.top + this.padding.bottom;
+
+    this.interval = interval;
+
+    this.data = rawData.map(function(tuple) {
+      return {
+        time: parseDate(tuple[0]),
+        count: tuple[1]
+      };
+    });
+
+    var xExtent = d3.extent(this.data, function(d) { return d.time; });
+    var domain = this.data.map(function(d) { return d.time; });
+
+    if (this.interval === 'hour') {
+      var paddingFn = d3.timeHour;
+    }
+    else {
+      var paddingFn = d3.timeMinute;
+    }
+
+    var xMin = xExtent[0];
+    var xMax = xExtent[1];
+    this.xExtentPadded = [
+      paddingFn.offset(xMin, -1),
+      paddingFn.offset(xMax, 1)
+    ];
+
+    // Pad x domain so that bars don't go over the rightmost edge.
+    this.paddedData = domain.concat(this.xExtentPadded);
+  };
+
+  TimeseriesGraph.prototype.drawGraph = function(selector) {
+    var self = this;
+    $(selector).empty();
+    var x = d3.scaleTime().range([0, this.width]);
+    var y = d3.scaleLinear().range([this.height, 0]);
+
+    var ordinalXScale = d3.scaleBand().domain(this.paddedData).range([0, this.width]);
+
+    var svg = d3.select(selector)
+      .attr("width", this.outerWidth)
+      .attr("height", this.outerHeight);
+    var g = svg.append("g")
+      .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
+
+    var yMax = d3.max(this.data, function(d) { return d.count; });
+
+    x.domain(this.xExtentPadded);
+    if (yMax > 0) {
+      y.domain([0, yMax]);
+    }
+    else {
+      y.domain([0, 5]);
+    }
+
+    var xAxis = g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + this.height + ")")
+      .call(d3.axisBottom(x));
+
+    var yAxis = g.append("g").attr("class", "axis axis--y");
+
+    if (yMax < 10 && yMax > 0) {
+      yAxis.call(d3.axisLeft(y).ticks(yMax, 'd'));
+    }
+    else if (yMax === 0) {
+      yAxis.call(d3.axisLeft(y).ticks(5, 'd'));
+    }
+    else {
+      yAxis.call(d3.axisLeft(y).ticks(8, 'd'));
+    }
+
+    svg.append("text")
+      .attr('text-anchor', 'middle')
+      .attr('transform', 'translate('+ (this.width / 2 + this.padding.left) +','+ this.padding.top / 2 +')')
+      .text(this.graphTitle);
+
+    svg.append("text")
+      .attr('text-anchor', 'middle')
+      .attr("transform", "translate(10,"+(this.height/2+this.padding.top)+")rotate(-90)")
+      .text("Jobs");
+
+    svg.append("text")
+      .attr('text-anchor', 'middle')
+      .attr("transform", "translate("+ (this.width / 2 + this.padding.left) +","+ (this.outerHeight - this.margin.bottom) +")")
+      .text("Time");
+
+    var barSpacing = 1;
+    g.selectAll(".bar")
+      .data(this.data)
+      .enter().append("rect")
+      .attr('fill', '#555')
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.time); })
+      .attr("y", function(d) { return y(d.count); })
+      .attr("width", ordinalXScale.bandwidth() - barSpacing)
+      .attr("height", function(d) { return self.height - y(d.count); });
+  };
+
+  if (performed) {
+    var performedGraph = new TimeseriesGraph(performed, 'Performed', interval);
+    performedGraph.drawGraph('#performed-graph');
+  }
+
+  if (enqueued) {
+    var enqueuedGraph = new TimeseriesGraph(enqueued, 'Enqueued', interval);
+    enqueuedGraph.drawGraph('#enqueued-graph');
+  }
+
+});
+
+</script>
+<script src="<%= url_path("/job_stats?js=d3.v4.min.js") %>"></script>
