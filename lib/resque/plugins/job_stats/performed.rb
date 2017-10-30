@@ -8,6 +8,7 @@ module Resque
 
         # Sets the number of jobs performed
         def jobs_performed=(int)
+          Resque::Plugins::JobStats.add_measured_job(self.name)
           Resque.redis.set(jobs_performed_key,int)
         end
 
@@ -23,6 +24,7 @@ module Resque
 
         # Increments the performed count when job is complete
         def after_perform_job_stats_performed(*args)
+          Resque::Plugins::JobStats.add_measured_job(self.name)
           Resque.redis.incr(jobs_performed_key)
         end
 

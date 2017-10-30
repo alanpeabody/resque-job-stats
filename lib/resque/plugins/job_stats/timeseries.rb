@@ -41,6 +41,7 @@ module Resque
           end
 
           def incr_timeseries(type) # :nodoc:
+            Resque::Plugins::JobStats.add_measured_job(self.name)
             increx(jobs_timeseries_key(type, timestamp, :minutes), (60 * 61)) # 1h + 1m for some buffer
             increx(jobs_timeseries_key(type, timestamp, :hours), (60 * 60 * 25)) # 24h + 60m for some buffer
           end

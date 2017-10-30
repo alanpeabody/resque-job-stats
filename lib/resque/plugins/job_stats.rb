@@ -18,12 +18,16 @@ module Resque
       include Resque::Plugins::JobStats::Timeseries::Performed
       include Resque::Plugins::JobStats::History
 
-      def self.extended(base)
-        self.measured_jobs << base
+      def self.add_measured_job(name)
+        Resque.redis.sadd("stats:jobs", name)
+      end
+
+      def self.rem_measured_job(name)
+        Resque.redis.srem("stats:jobs", name)
       end
 
       def self.measured_jobs
-        @measured_jobs ||= []
+        Resque.redis.smembers("stats:jobs").collect { |c| c.constantize rescue nil }.compact
       end
     end
   end

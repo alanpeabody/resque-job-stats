@@ -8,6 +8,7 @@ module Resque
 
         # Sets the number of jobs queued
         def jobs_enqueued=(int)
+          Resque::Plugins::JobStats.add_measured_job(self.name)
           Resque.redis.set(jobs_enqueued_key,int)
         end
 
@@ -23,6 +24,7 @@ module Resque
 
         # Increments the enqueued count when job is queued
         def after_enqueue_job_stats_enqueued(*args)
+          Resque::Plugins::JobStats.add_measured_job(self.name)
           Resque.redis.incr(jobs_enqueued_key)
         end
 
