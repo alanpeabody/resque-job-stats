@@ -119,7 +119,7 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
   def test_perform_timeseries
     time = SimpleJob.timestamp
     3.times do
-      Resque.enqueue(SimpleJob)
+      Resque.enqueue(SimpleJob, 0)
       @worker.work(0)
     end
     assert_equal 3, SimpleJob.performed_per_minute[time]
@@ -142,7 +142,12 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
   end
 
   def test_measured_jobs
-    assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
+    assert_equal [], Resque::Plugins::JobStats.measured_jobs
+    3.times do
+      Resque.enqueue(SimpleJob,1)
+      @worker.work(0)
+    end
+    assert_equal ["SimpleJob"], Resque::Plugins::JobStats.measured_jobs
   end
 
   def test_history

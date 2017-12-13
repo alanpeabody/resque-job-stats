@@ -5,7 +5,7 @@ require 'rack/test'
 require 'resque'
 require 'timecop'
 
-Resque.redis = 'localhost:6379'
+Resque.redis = 'localhost:6009'
 Resque.redis.namespace = 'resque:job_stats'
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))

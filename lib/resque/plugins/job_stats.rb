@@ -27,7 +27,7 @@ module Resque
       end
 
       def self.measured_jobs
-        Resque.redis.smembers("stats:jobs").collect { |c| c.constantize rescue nil }.compact
+        Resque.redis.smembers("stats:jobs").collect { |c| c rescue nil }.compact
       end
     end
   end
