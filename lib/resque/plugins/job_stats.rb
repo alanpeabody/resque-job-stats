@@ -22,13 +22,18 @@ module Resque
       mattr_accessor :jobs_to_be_measured
       @@jobs_to_be_measured = []
 
-      def self.setup
-        yield self
+      #def self.setup
+        #yield self
 
-        @@jobs_to_be_measured.each do |job_name|
-          Resque.redis.sadd("stats:jobs", name)
-        end
-        Resque.redis.smembers("stats:jobs").collect { |c| c rescue nil }.compact
+        #@@jobs_to_be_measured.each do |job_name|
+          #Resque.redis.sadd("stats:jobs", name)
+        #end
+        #Resque.redis.smembers("stats:jobs").collect { |c| c rescue nil }.compact
+      #end
+
+      def self.extended(base)
+        self.jobs_to_be_measured << base
+        puts "............ jobs_to_be_measured #{self.jobs_to_be_measured}"
       end
 
       def self.add_measured_job(name)
@@ -40,7 +45,8 @@ module Resque
       end
 
       def self.measured_jobs
-        Resque.redis.smembers("stats:jobs").collect { |c| c rescue nil }.compact
+        #Resque.redis.smembers("stats:jobs").collect { |c| c rescue nil }.compact
+        self.jobs_to_be_measured
       end
     end
   end
