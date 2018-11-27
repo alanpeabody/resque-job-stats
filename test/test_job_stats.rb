@@ -35,6 +35,10 @@ class CustomHistJob < BaseJob
   @histories_recordable = 5
 end
 
+class SimpleOneTimeJob < BaseJob
+  @queue = :test
+end
+
 class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def setup
@@ -143,10 +147,7 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
 
   def test_measured_jobs
     assert_equal [], Resque::Plugins::JobStats.measured_jobs
-    3.times do
-      Resque.enqueue(SimpleJob,1)
-      @worker.work(0)
-    end
+    SimpleJob.extend Resque::Plugins::JobStats
     assert_equal ["SimpleJob"], Resque::Plugins::JobStats.measured_jobs
   end
 

@@ -8,7 +8,6 @@ module Resque
 
         # Sets the number of jobs failed
         def jobs_failed=(int)
-          #Resque::Plugins::JobStats.add_measured_job(self.name)
           Resque.redis.set(jobs_failed_key,int)
         end
 
@@ -26,7 +25,6 @@ module Resque
 
         # Increments the failed count when job is complete
         def on_failure_job_stats_failed(e,*args)
-          #Resque::Plugins::JobStats.add_measured_job(self.name)
           Resque.redis.incr(jobs_failed_key)
         end
 
