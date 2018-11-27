@@ -17,6 +17,19 @@ module Resque
       include Resque::Plugins::JobStats::Timeseries::Enqueued
       include Resque::Plugins::JobStats::Timeseries::Performed
       include Resque::Plugins::JobStats::History
+      
+      # Define jobs_to_be_measured
+      mattr_accessor :jobs_to_be_measured
+      @@jobs_to_be_measured = []
+
+      def self.setup
+        yield self
+
+        @@jobs_to_be_measured.each do |job_name|
+          Resque.redis.sadd("stats:jobs", name)
+        end
+        Resque.redis.smembers("stats:jobs").collect { |c| c rescue nil }.compact
+      end
 
       def self.add_measured_job(name)
         Resque.redis.sadd("stats:jobs", name)
