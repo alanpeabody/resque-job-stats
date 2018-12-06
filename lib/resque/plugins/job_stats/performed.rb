@@ -5,6 +5,7 @@ module Resque
       # Extend your job with this module to track how many
       # jobs are performed successfully
       module Performed
+        include Resque::Plugins::JobStats::MeasuredHook
 
         # Sets the number of jobs performed
         def jobs_performed=(int)

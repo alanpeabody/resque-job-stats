@@ -2,6 +2,7 @@ module Resque
   module Plugins
     module JobStats
       module Duration
+        include Resque::Plugins::JobStats::MeasuredHook
 
         # Resets all job durations
         def reset_job_durations
