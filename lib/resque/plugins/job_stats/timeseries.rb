@@ -57,7 +57,7 @@ module Resque
 end
 
 module Resque::Plugins::JobStats::Timeseries::Enqueued
-  extend Resque::Plugins::JobStats::MeasuredHook
+  include Resque::Plugins::JobStats::MeasuredHook
   include Resque::Plugins::JobStats::Timeseries::Common
 
   # Increments the enqueued count for the timestamp when job is queued
@@ -77,7 +77,7 @@ module Resque::Plugins::JobStats::Timeseries::Enqueued
 end
 
 module Resque::Plugins::JobStats::Timeseries::Performed
-  extend Resque::Plugins::JobStats::MeasuredHook
+  include Resque::Plugins::JobStats::MeasuredHook
   include Resque::Plugins::JobStats::Timeseries::Common
 
   # Increments the performed count for the timestamp when job is complete

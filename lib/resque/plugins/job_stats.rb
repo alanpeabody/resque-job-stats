@@ -11,7 +11,7 @@ require 'resque/plugins/job_stats/history'
 module Resque
   module Plugins
     module JobStats
-      extend Resque::Plugins::JobStats::MeasuredHook
+      include Resque::Plugins::JobStats::MeasuredHook
       include Resque::Plugins::JobStats::Performed
       include Resque::Plugins::JobStats::Enqueued
       include Resque::Plugins::JobStats::Failed

@@ -35,8 +35,13 @@ class CustomHistJob < BaseJob
   @histories_recordable = 5
 end
 
-class SimpleOneTimeJob < BaseJob
+class LoadedBaseJob
+  extend Resque::Plugins::JobStats
   @queue = :test
+
+  def self.perform(sleep_time=0.01)
+    sleep sleep_time
+  end
 end
 
 class TestResqueJobStats < MiniTest::Unit::TestCase
@@ -149,8 +154,9 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_equal [], Resque::Plugins::JobStats.measured_jobs
     SimpleJob.extend Resque::Plugins::JobStats
     assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
-    SimpleOneTimeJob.extend Resque::Plugins::JobStats::Failed
-    assert Resque::Plugins::JobStats.measured_jobs.include? SimpleOneTimeJob
+    FailJob.extend Resque::Plugins::JobStats::Failed
+    assert Resque::Plugins::JobStats.measured_jobs.include? FailJob
+    Object.const_set "LoadedChildJob", Class.new(LoadedBaseJob)
   end
 
   def test_history
