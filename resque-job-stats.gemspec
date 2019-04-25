@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
 
   s.homepage = "http://github.com/alanpeabody/resque-job-stats"
   s.licenses = ["MIT"]
-  s.required_ruby_version = ">= 1.9.2"
+  s.required_ruby_version = ">= 2.2"
   
   s.summary = "Job-centric stats for Resque"
 
