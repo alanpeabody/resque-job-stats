@@ -3,6 +3,7 @@
 ## Master
 
 * Add example app (#27, 158f466)
+* Remove support for ruby 1.9 and 2.1 (#36, 3cf0aab)
 
 ## 0.4.2
 

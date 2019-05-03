@@ -147,6 +147,7 @@ If you wish to display only certain metrics, you can filter the metrics accordin
 
 * [damonmorgan](https://github.com/damonmorgan)
 * [unclebilly](https://github.com/unclebilly)
+* [jesperronn](https://github.com/jesperronn)
 
 ## Copyright
 
