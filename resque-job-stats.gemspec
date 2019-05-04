@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   
   s.summary = "Job-centric stats for Resque"
 
-  s.add_dependency('resque', '~> 1.17')
+  s.add_dependency('resque', '>= 1.17', '< 3')
 
   s.add_development_dependency "rake"
   s.add_development_dependency "minitest", '~> 5.0'
