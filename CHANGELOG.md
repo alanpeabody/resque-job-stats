@@ -2,6 +2,8 @@
 
 ## Master
 
+## 0.5.0
+
 * Add example app (#27, 158f466)
 * Remove support for ruby 1.9 and 2.1 (#36, 3cf0aab)
 * Support Resque 2 (#35, 3e30e9c)
