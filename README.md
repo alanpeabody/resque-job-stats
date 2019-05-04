@@ -23,7 +23,7 @@ We are sending this information to Nagios for graphing and alerts (via a custom 
 
 ## Installation
 
-Requires resque '~> 1.17.0'
+Requires resque '>= 1.17', '< 3'
 
 In your Gemfile add:
 
