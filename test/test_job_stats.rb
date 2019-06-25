@@ -92,11 +92,11 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
       @worker.work(0)
     end
 
-    assert_in_delta 0.3, SimpleJob.job_durations[0], 0.01
-    assert_in_delta 0.2, SimpleJob.job_durations[1], 0.01
-    assert_in_delta 0.1, SimpleJob.job_durations[2], 0.01
-    assert_in_delta 0.3, SimpleJob.longest_job, 0.01
-    assert_in_delta 0.2, SimpleJob.job_rolling_avg, 0.01
+    assert_in_delta 0.3, SimpleJob.job_durations[0], 0.05
+    assert_in_delta 0.2, SimpleJob.job_durations[1], 0.05
+    assert_in_delta 0.1, SimpleJob.job_durations[2], 0.05
+    assert_in_delta 0.3, SimpleJob.longest_job, 0.05
+    assert_in_delta 0.2, SimpleJob.job_rolling_avg, 0.05
   end
 
   def test_custom_duration
@@ -112,8 +112,8 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
       @worker.work(0)
     end
 
-    assert_in_delta 0.1, CustomDurJob.longest_job, 0.01
-    assert_in_delta 0.1, CustomDurJob.job_rolling_avg, 0.01
+    assert_in_delta 0.1, CustomDurJob.longest_job, 0.05
+    assert_in_delta 0.1, CustomDurJob.job_rolling_avg, 0.05
   end
 
   def test_perform_timeseries
@@ -162,16 +162,16 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_equal 1, SimpleJob.job_histories(1,1).count
 
     assert SimpleJob.job_histories[0]["success"]
-    assert_in_delta 0.3, SimpleJob.job_histories[0]["args"][0], 0.01
-    assert_in_delta 0.3, SimpleJob.job_histories[0]["duration"], 0.01
+    assert_in_delta 0.3, SimpleJob.job_histories[0]["args"][0], 0.05
+    assert_in_delta 0.3, SimpleJob.job_histories[0]["duration"], 0.05
 
     assert SimpleJob.job_histories[1]["success"]
-    assert_in_delta 0.2, SimpleJob.job_histories[1]["args"][0], 0.01
-    assert_in_delta 0.2, SimpleJob.job_histories[1]["duration"], 0.01
+    assert_in_delta 0.2, SimpleJob.job_histories[1]["args"][0], 0.05
+    assert_in_delta 0.2, SimpleJob.job_histories[1]["duration"], 0.05
 
     assert SimpleJob.job_histories[2]["success"]
-    assert_in_delta 0.1, SimpleJob.job_histories[2]["args"][0], 0.01
-    assert_in_delta 0.1, SimpleJob.job_histories[2]["duration"], 0.01
+    assert_in_delta 0.1, SimpleJob.job_histories[2]["args"][0], 0.05
+    assert_in_delta 0.1, SimpleJob.job_histories[2]["duration"], 0.05
   end
 
   def test_custom_history
@@ -188,8 +188,8 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     end
 
     assert_equal 5, CustomHistJob.job_histories.count
-    assert_in_delta 0.1, CustomHistJob.job_histories.first["args"][0], 0.01
-    assert_in_delta 0.1, CustomHistJob.job_histories.last["args"][0], 0.01
+    assert_in_delta 0.1, CustomHistJob.job_histories.first["args"][0], 0.05
+    assert_in_delta 0.1, CustomHistJob.job_histories.last["args"][0], 0.05
   end
 
   def test_failure_history

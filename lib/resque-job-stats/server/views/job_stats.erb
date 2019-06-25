@@ -21,6 +21,12 @@
               job.job_class.is_a?(Resque::Plugins::JobStats::History) %>
           <a href='<%= url "/job_history/#{job.name}" %>'>[history]</a>
         <% end %>
+        <% if job.job_class <= Resque::Plugins::JobStats::Timeseries::Enqueued ||
+              job.job_class.is_a?(Resque::Plugins::JobStats::Timeseries::Enqueued) ||
+              job.job_class <= Resque::Plugins::JobStats::Timeseries::Performed ||
+              job.job_class.is_a?(Resque::Plugins::JobStats::Timeseries::Performed) %>
+          <a href='<%= url "/job_stats/timeseries/#{job.name}" %>'>[timeseries]</a>
+        <% end %>
       </td>
       <%= display_stat(job, :jobs_enqueued,   :number_display) %>
       <%= display_stat(job, :jobs_performed,  :number_display) %>

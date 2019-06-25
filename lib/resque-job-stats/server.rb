@@ -5,6 +5,7 @@ module Resque
     module JobStats
       module Server
         VIEW_PATH = File.join(File.dirname(__FILE__), 'server', 'views')
+        PUBLIC_PATH = File.join(File.dirname(__FILE__), 'server', 'public')
 
         def job_stats_to_display
           @job_stats_to_display ||= Resque::Plugins::JobStats::Statistic::DEFAULT_STATS
@@ -48,13 +49,26 @@ module Resque
           def check_or_cross_stat(value)
             value ? "&#x2713;" : "&#x2717;"
           end
+
+          def render_public_file(filename)
+            file = File.join(PUBLIC_PATH, filename)
+              cache_control :public, :max_age => 86400
+              send_file file
+          rescue Errno::ENOENT
+            status 404
+          end
         end
 
         class << self
           def registered(app)
             app.get '/job_stats' do
-              @jobs = Resque::Plugins::JobStats::Statistic.find_all(self.class.job_stats_to_display).sort
-              erb(File.read(File.join(VIEW_PATH, 'job_stats.erb')))
+              key = params.keys.first
+              if key == 'js'
+                render_public_file(params[key])
+              else
+                @jobs = Resque::Plugins::JobStats::Statistic.find_all(self.class.job_stats_to_display).sort
+                erb(File.read(File.join(VIEW_PATH, 'job_stats.erb')))
+              end
             end
             # We have little choice in using this funky name - Resque
             # already has a "Stats" tab, and it doesn't like
@@ -74,6 +88,29 @@ module Resque
               @size = @job_class.histories_recorded
 
               erb(File.read(File.join(VIEW_PATH, 'job_histories.erb')))
+            end
+
+            app.get '/job_stats/timeseries/:job_class' do
+              @job_class = Resque::Plugins::JobStats.measured_jobs.find { |j| j.to_s == params[:job_class] }
+              pass unless @job_class
+
+              @interval = params[:interval] == 'minute' ? 'minute' : 'hour'
+              other_interval_label = params[:interval] == 'minute' ? 'hour' : 'minute'
+              @toggle_interval_url = "#{request.path_info}?interval=#{other_interval_label}"
+
+              if @job_class.respond_to?("queued_per_#{@interval}")
+                @enqueued = @job_class.public_send("queued_per_#{@interval}").to_a
+              else
+                @enqueued = nil
+              end
+
+              if @job_class.respond_to?("performed_per_#{@interval}")
+                @performed = @job_class.public_send("performed_per_#{@interval}").to_a
+              else
+                @performed = nil
+              end
+
+              erb(File.read(File.join(VIEW_PATH, 'job_timeseries.erb')))
             end
 
             app.helpers(Helpers)

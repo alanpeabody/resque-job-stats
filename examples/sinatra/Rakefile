@@ -20,3 +20,11 @@ task :enqueue_failure do
     Resque.enqueue(FailingJob, {})
   end
 end
+
+desc "Enqueue a random sample of jobs"
+task :enqueue_random_sample do
+  job_klasses = Object.constants.select {|s| s.to_s.match(/Job\z/)}
+  job_klasses.each do |klass|
+    (rand(5) + 1).times { Resque.enqueue(Object.const_get(klass), {}) }
+  end
+end
