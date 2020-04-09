@@ -1,5 +1,5 @@
 require 'helper'
-
+require 'active_job'
 class BaseJob
   @queue = :test
 
@@ -33,6 +33,14 @@ class CustomHistJob < BaseJob
   extend Resque::Plugins::JobStats::History
   @queue = :test
   @histories_recordable = 5
+end
+
+class InstanceMethodJob < ActiveJob::Base
+  include Resque::Plugins::JobStats
+  queue_as  :test
+  def perform(sleep_time=0.01)
+    sleep sleep_time
+  end
 end
 
 class TestResqueJobStats < MiniTest::Unit::TestCase
@@ -142,7 +150,7 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
   end
 
   def test_measured_jobs
-    assert_equal [SimpleJob], Resque::Plugins::JobStats.measured_jobs
+    assert_equal [SimpleJob, InstanceMethodJob], Resque::Plugins::JobStats.measured_jobs
   end
 
   def test_history
@@ -204,5 +212,15 @@ class TestResqueJobStats < MiniTest::Unit::TestCase
     assert_equal 0, FailJob.job_histories.first["args"].count
     assert ! FailJob.job_histories.first["success"]
     assert_equal "fail", FailJob.job_histories.first["exception"]["name"]
+  end
+
+  def test_instance_method_jobs_perform
+    assert_equal 'stats:jobs:InstanceMethodJob:performed', InstanceMethodJob.jobs_performed_key
+    InstanceMethodJob.jobs_performed = 0
+    3.times do
+      InstanceMethodJob.perform_now
+      @worker.work(0)
+    end
+    assert_equal 3, InstanceMethodJob.jobs_performed
   end
 end
