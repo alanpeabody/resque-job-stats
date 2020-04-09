@@ -46,6 +46,19 @@ class MyJob
 end
 ```
 
+If you are using ActiveJob::Base, you need to include it instead:
+
+```ruby
+class MyActiveJob < ActiveJob::Base
+  include Resque::Plugins::JobStats
+
+  queue_as :my_job
+  def perform(*args)
+    # ..
+  end
+end
+```
+
 And you will have a set of keys starting with `'stats:jobs:my_job'` inside your Resque redis namespace.
 
 Alternatively you can include just the metric you wish to record.
@@ -140,7 +153,8 @@ If you wish to display only certain metrics, you can filter the metrics accordin
 * Fork the project
 * Start a feature/bugfix branch
 * Commit and push until you are happy with your contribution
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
+* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.  
+* You can use `docker-compose -f test.yml up` to bring up a redis container needed for the tests to run.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
 ## Contributers

@@ -34,4 +34,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest", '~> 5.0'
   s.add_development_dependency "timecop", '~> 0.6'
   s.add_development_dependency 'rack-test', '>= 0'
+  s.add_development_dependency 'activejob', '>= 5.1.7'
+
 end
