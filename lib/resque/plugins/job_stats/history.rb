@@ -18,14 +18,19 @@ module Resque
           # than correlate with the duration stat to make sure
           # we're associating them with the right job arguments
           start = Time.now
+
+          # new - fork
+          number_of_jobs_in_queue = self.number_of_jobs_in_queue
+          been_in_the_queue_for = self.been_in_the_queue_for(args.last.to_time)
+
           begin
             yield
             duration = Time.now - start
-            push_history "success" => true, "args" => args, "run_at" => start, "duration" => duration
+            push_history "success" => true, "args" => args, "run_at" => start, "duration" => duration, "number_of_jobs_in_queue" => number_of_jobs_in_queue, "been_in_the_queue_for" => been_in_the_queue_for
           rescue Exception => e
             duration = Time.now - start
             exception = { "name" => e.to_s, "backtrace" => e.backtrace }
-            push_history "success" => false, "exception" => exception, "args" => args, "run_at" => start, "duration" => duration
+            push_history "success" => false, "exception" => exception, "args" => args, "run_at" => start, "duration" => duration, "number_of_jobs_in_queue" => number_of_jobs_in_queue, "been_in_the_queue_for" => been_in_the_queue_for
             raise e
           end
         end

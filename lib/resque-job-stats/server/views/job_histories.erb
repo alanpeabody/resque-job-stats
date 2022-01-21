@@ -11,19 +11,35 @@
     <th>Start time</th>
     <th>Duration</th>
     <th>Arguments</th>
-    <th>Success</th>
-    <th>Exception</th>
+    <th>Execution</th>
+
+    <%# new - fork %>
+    <th>Time spend waiting</th>
+    <th>Jobs in the queue at time of execution</th>
   </tr>
   <% @histories.each do |history| %>
     <tr>
-      <td><span class="time"><%= history["run_at"] %></span></td>
+      <td><%= DateTime.parse(history["run_at"]).strftime("%m/%d/%Y %H:%M:%S") %></td>
       <td><%= history["duration"] %></td>
       <td><%= history["args"].inspect %></td>
-      <td><%= check_or_cross_stat(history["success"]) %></td>
-      <td><%= history["exception"]["name"] if history["exception"] %></td>
+      <td class="<%= history["exception"] ? 'exception' : 'success' %>"><%= history["exception"] ? history["exception"]["name"] : 'Success'  %></td>
+      <td><%= history["been_in_the_queue_for"] %></td>
+      <td><%= history["number_of_jobs_in_queue"] %></td>
     </tr>
   <% end %>
 </table>
+
+<style>
+  .exception {
+    background: #fff0f4;
+    color: #c51244;
+  }
+
+  .success {
+    background: #d4edda;
+    color: #155724;
+  }
+</style>
 
 <%if @start > 0 || @start + @limit <= @size %>
 <p class='pagination'>
